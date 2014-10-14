@@ -1,9 +1,10 @@
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 // #include "input.h"
 
 using namespace std;
-const char basisOrder[] = {'s','s','p'};
+const char basisOrder[] = {'s','s','p','s','p'};
 const double tollerance = 1e-10;
 
 // const int numAtoms = 2;
@@ -14,30 +15,58 @@ struct atom
 {
     double Ax, Ay, Az;
     double numBasis;
-    double *coeficient;
-    double *exponent;
+    double *coeficient; // basis koeficient
+    double *exponent; // basis exponent
 };
 
 // grid for one atom
 class grid
 {
 public:
+    atom gridAtom;
+    grid();
+    ~grid();
     void calcGrid();
     void printGrid();
-    void setGridCoordinates(double low, double up);
-    void evenGridCoordinateX(double min, double max);
+    void evenGridCoordinateX(double min, double max);   // just for testing
     void evenGridCoordinateY(double min, double max);
     void evenGridCoordinateZ(double min, double max);
 
 private:
-    atom gridAtom;
     double gridCoordinateX[gridSize]; // store numerical value of coordinate
     double gridCoordinateY[gridSize];
     double gridCoordinateZ[gridSize];
-    double gridValue[gridSize][gridSize][gridSize];
+    double ***gridValue;
     double sType(double rx, double ry, double rz, int curAo);
     double getR(double rx, double ry, double rz);
 };
+
+// constructor & deconstructor
+grid::grid()
+{
+    gridValue = new double**[gridSize];
+    for( int i = 0; i < gridSize; i++ )
+    {
+        gridValue[i] = new double*[gridSize];
+        for( int j = 0; j < gridSize; j++ )
+        {
+            gridValue[i][j] = new double[gridSize];
+        }
+    }
+}
+
+grid::~grid()
+{
+    for (int i = 0; i < gridSize; i++)
+    {
+        for (int j = 0; j < gridSize; j++)
+        {
+            delete [] gridValue[i][j];
+        }
+        delete [] gridValue[i];
+    }
+    delete [] gridValue;
+}
 
 // functions
 double grid::getR(double rx, double ry, double rz)
@@ -47,16 +76,7 @@ double grid::getR(double rx, double ry, double rz)
 
 double grid::sType(double rx, double ry, double rz, int curAo)
 {
-    return gridAtom.coeficient[curAo]*exp( gridAtom.exponent[curAo]*getR(rx, ry, rz) );
-}
-
-{
-    double step = (max - min) / gridSize;
-
-    for( int i = 0; i < gridSize; i++ )
-    {
-        gridCoordinateX[i] = min + i*step;
-    }
+    return gridAtom.coeficient[curAo]*exp( -1.0*gridAtom.exponent[curAo]*getR(rx, ry, rz) );
 }
 
 void grid::calcGrid()
@@ -91,6 +111,7 @@ void grid::printGrid()
 
     for(int i = 0; i < gridSize; i++)
     {
+        cout << setprecision(3) << gridCoordinateY[i] << ":\t";
         for(int j = 0; j < gridSize; j++)
         {
             ptValue = 0;
@@ -98,16 +119,21 @@ void grid::printGrid()
             {
                 ptValue += gridValue[i][j][k];
             }
-            cout << gridValue << "\t";
+            cout << setprecision(5) << ptValue << "\t";
         }
         cout << "\n";
     }
+
+    cout << "y\/x\t";
+    for(int j = 0; j < gridSize; j++)
+        cout << setprecision(3) << gridCoordinateX[j] << "\t";
+    cout << "\n";
 }
 
 // functions for pseudo generation of grid
 void grid::evenGridCoordinateX(double min, double max)
 {
-    double step = (max - min) / gridSize;
+    double step = (max - min) / (gridSize - 1);
 
     for( int i = 0; i < gridSize; i++ )
     {
@@ -117,7 +143,7 @@ void grid::evenGridCoordinateX(double min, double max)
 
 void grid::evenGridCoordinateY(double min, double max)
 {
-    double step = (max - min) / gridSize;
+    double step = (max - min) / (gridSize - 1);
 
     for( int i = 0; i < gridSize; i++ )
     {
@@ -126,8 +152,33 @@ void grid::evenGridCoordinateY(double min, double max)
 }
 
 void grid::evenGridCoordinateZ(double min, double max)
-// testing
+{
+    double step = (max - min) / (gridSize - 1);
+
+    for( int i = 0; i < gridSize; i++ )
+    {
+        gridCoordinateZ[i] = min + i*step;
+    }
+}
+
+// test scenario, H
 int main()
 {
+    grid myGrid;
+    myGrid.gridAtom.Ax = 0.4;
+    myGrid.gridAtom.Ax = 0.5;
+    myGrid.gridAtom.Ax = 0.6;
+    myGrid.gridAtom.coeficient = new double[2];
+    myGrid.gridAtom.exponent = new double[2];
+    myGrid.gridAtom.coeficient[0] = 0.3;
+    myGrid.gridAtom.coeficient[1] = 0.5;
+    myGrid.gridAtom.exponent[0] = 1;
+    myGrid.gridAtom.exponent[1] = 0.5;
+    myGrid.evenGridCoordinateX(0.1, 1.5);
+    myGrid.evenGridCoordinateY(0.1, 1.5);
+    myGrid.evenGridCoordinateZ(0.1, 1.5);
+    myGrid.calcGrid();
+    myGrid.printGrid();
+
     return 1;
 }
