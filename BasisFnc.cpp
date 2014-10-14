@@ -1,112 +1,133 @@
 #include <iostream>
 #include <cmath>
+// #include "input.h"
 
-const int gridSize = 20;
-const int numAtoms = 3;
-const double tollerance = 1e-6;
 using namespace std;
+const char basisOrder[] = {'s','s','p'};
+const double tollerance = 1e-10;
 
-// structure for a Atom
+// const int numAtoms = 2;
+const int gridSize = 10;
+
+// holds information about an atom
 struct atom
 {
-    int rxA, ryA, rzA;
-    double coef;
-    double exp;
+    double Ax, Ay, Az;
+    double numBasis;
+    double *coeficient;
+    double *exponent;
 };
 
-// base class for sType base function
+// grid for one atom
 class grid
 {
-    public:
-        void setAtomicCoordinates(int[], int[], int[], double[], double[] );
-        void calcEnergy();
-        void printGrid();
+public:
+    void calcGrid();
+    void printGrid();
+    void setGridCoordinates(double low, double up);
+    void evenGridCoordinateX(double min, double max);
+    void evenGridCoordinateY(double min, double max);
+    void evenGridCoordinateZ(double min, double max);
 
-    private:
-        atom Atoms[numAtoms];
-        double gridEnergy[gridSize][gridSize][gridSize];
-        double sType(int rx, int ry, int rz, int curAtom);
-        double getR(int rx, int ry, int rz, int rxA, int ryA, int rzA);
+private:
+    atom gridAtom;
+    double gridCoordinateX[gridSize]; // store numerical value of coordinate
+    double gridCoordinateY[gridSize];
+    double gridCoordinateZ[gridSize];
+    double gridValue[gridSize][gridSize][gridSize];
+    double sType(double rx, double ry, double rz, int curAo);
+    double getR(double rx, double ry, double rz);
 };
 
-// set parameters for atoms
-void grid::setAtomicCoordinates(int x[], int y[], int z[], double coef[], double exp[])
+// functions
+double grid::getR(double rx, double ry, double rz)
 {
-    for(int i = 0; i < numAtoms; i++)
+    return (rx - gridAtom.Ax)*(rx - gridAtom.Ax) + (ry - gridAtom.Ay)*(ry - gridAtom.Ay) + (rz - gridAtom.Az)*(rz - gridAtom.Az);
+}
+
+double grid::sType(double rx, double ry, double rz, int curAo)
+{
+    return gridAtom.coeficient[curAo]*exp( gridAtom.exponent[curAo]*getR(rx, ry, rz) );
+}
+
+{
+    double step = (max - min) / gridSize;
+
+    for( int i = 0; i < gridSize; i++ )
     {
-        Atoms[i].rxA = x[i];
-        Atoms[i].ryA = y[i];
-        Atoms[i].rzA = z[i];
-        Atoms[i].coef = coef[i];
-        Atoms[i].exp = exp[i];
+        gridCoordinateX[i] = min + i*step;
     }
 }
 
-void grid::calcEnergy()
+void grid::calcGrid()
 {
-    int curAtom;
-
     for(int i = 0; i < gridSize; i++)
     {
         for(int j = 0; j < gridSize; j++)
         {
             for(int k = 0; k < gridSize; k++)
             {
-                gridEnergy[i][j][k] = 0;
-                for(curAtom = 0; curAtom < numAtoms; curAtom++)
+                gridValue[i][j][k] = 0;
+                for(int curAo = 0; curAo < gridAtom.numBasis; curAo++)
                 {
-                    gridEnergy[i][j][k] += sType(i, j, k, curAtom);
+                    switch(basisOrder[curAo])
+                    {
+                    case 's':
+                        gridValue[i][j][k] += sType(gridCoordinateX[i], gridCoordinateY[j], gridCoordinateZ[k], curAo);
+                        break;
+                    }
                 }
-                if(gridEnergy[i][j][k] < tollerance)
-                    gridEnergy[i][j][k] = 0;
+                if(gridValue[i][j][k] < tollerance)
+                    gridValue[i][j][k] = 0;
             }
         }
     }
-
-    cout << "Calculation completed with success.\n";
-}
-// calculate Energy from a single atom
-double grid::sType(int rx, int ry, int rz, int curAtom)
-{
-    return Atoms[curAtom].coef * exp(-Atoms[curAtom].exp*getR(rx, ry, rz, Atoms[curAtom].rxA, Atoms[curAtom].ryA, Atoms[curAtom].rzA));
-}
-// calculates distance
-double grid::getR(int rx, int ry, int rz, int rxA, int ryA, int rzA)
-{
-    return (rx - rxA)*(rx - rxA) + (ry - ryA)*(ry - ryA) + (rz - rzA)*(rz - rzA);
 }
 
+// print grid on screen | file
 void grid::printGrid()
 {
-    double gridValue;
+    double ptValue;
 
     for(int i = 0; i < gridSize; i++)
     {
         for(int j = 0; j < gridSize; j++)
         {
-            gridValue = 0;
+            ptValue = 0;
             for(int k = 0; k < gridSize; k++)
             {
-                gridValue += gridEnergy[i][j][k];
+                ptValue += gridValue[i][j][k];
             }
-            cout << gridValue << " ";
+            cout << gridValue << "\t";
         }
         cout << "\n";
     }
 }
 
-// main for calculation testing
+// functions for pseudo generation of grid
+void grid::evenGridCoordinateX(double min, double max)
+{
+    double step = (max - min) / gridSize;
+
+    for( int i = 0; i < gridSize; i++ )
+    {
+        gridCoordinateX[i] = min + i*step;
+    }
+}
+
+void grid::evenGridCoordinateY(double min, double max)
+{
+    double step = (max - min) / gridSize;
+
+    for( int i = 0; i < gridSize; i++ )
+    {
+        gridCoordinateY[i] = min + i*step;
+    }
+}
+
+void grid::evenGridCoordinateZ(double min, double max)
+// testing
 int main()
 {
-    grid SmallField;
-    int x[] = {0, 5, 2};
-    int y[] = {0, 0, 5};
-    int z[] = {0, 5, 0};
-    double c[] = {0.6, 0.2, 0.2};
-    double alfa[] = {10, 1, 1};
-    SmallField.setAtomicCoordinates(x, y, z, c, alfa);
-    SmallField.calcEnergy();
-    SmallField.printGrid();
-
-    return 0;
+    return 1;
 }
