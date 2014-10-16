@@ -122,7 +122,7 @@ void grid::printGrid2D()
         for(int j = 0; j < gridSize; j++)
         {
             ptValue = 0;
-            for(int k = 0; k < 1; k++)
+            for(int k = 0; k < gridSize; k++)
             {
                 ptValue += gridValue[i][j][k];
             }
