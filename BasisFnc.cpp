@@ -95,6 +95,7 @@ void grid::calcGrid()
             for(int k = 0; k < gridSize; k++)
             {
                 gridValue[i][j][k] = 0;
+                // FIXME: gridAtom.numBasis is 1 in this case but should in this case be 3
                 for(int curAo = 0; curAo < gridAtom.numBasis; curAo++)
                 {
                     switch(gridAtom.basisTypes[curAo])
@@ -110,6 +111,22 @@ void grid::calcGrid()
         }
     }
 }
+
+// TODO: suggestion is to print results for N points and M basis functions like this
+//       this will make sense later
+// x_1 y_1 z_1 ao_1
+// x_2 y_2 z_2 ao_1
+// ...         ao_1
+// x_N y_N z_N ao_1
+// x_1 y_1 z_1 ao_2
+// x_2 y_2 z_2 ao_2
+// ...         ao_2
+// x_N y_N z_N ao_2
+// ...
+// x_1 y_1 z_1 ao_M
+// x_2 y_2 z_2 ao_M
+// ...         ao_M
+// x_N y_N z_N ao_M
 
 // print grid on screen | file
 void grid::printGrid2D()
@@ -196,5 +213,6 @@ int main()
     myGrid.calcGrid();
     myGrid.printGrid2D();
 
+    // FIXME: return value should be 0 to mark success
     return 1;
 }
