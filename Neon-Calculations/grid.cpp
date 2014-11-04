@@ -6,7 +6,7 @@
 void Grid::setGrid(int num)
 {
     numPoints = num;
-    numFnc = getNumFnc();
+    numFnc = 15;
     xCoord = new double[num];
     yCoord = new double[num];
     zCoord = new double[num];
@@ -16,7 +16,7 @@ void Grid::setGrid(int num)
     {
         gridValue[i] = new double[numFnc];
     }
-    std::cout << "Initialization succeed";
+    std::cout << "Initialization succeed\n";
 }
 
 void Grid::unsetGrid()
@@ -43,6 +43,8 @@ int Grid::getNumFnc() {
         if( shellCord[i].ang == 2 )
             count += 6;
     }
+
+    return count;
 }
 // generate coordinates randomly
 void Grid::setCoord()
@@ -64,33 +66,70 @@ void Grid::setCoord(int curPt, double x, double y, double z)
 // calculate energy at given points
 void Grid::calcGrid()
 {
-    int curValue;
+    int curValue, curFnc;
+    double value, R;
     for( int i = 0; i < numPoints; i++ )
     {
-        curValue = 0;
+        curValue = curFnc = 0;
         for( int j = 0; j < 6; j++ )
         {
+            R = getR(i, j);
+            value = 0;
+
             if( shellCord[j].ang == 0 )
-                gridValue[i][curValue++] += getValue(i, j);
+            {
+                while( shellNumber[curFnc] == (j+1) )
+                {
+                    value += getValue(curFnc, R);
+                    curFnc++;
+                }
+                gridValue[i][curValue++] = value;
+            }
+
             if( shellCord[j].ang == 1 )
             {
-                gridValue[i][curValue++] += xCoord[i]*getValue(i, j);
-                gridValue[i][curValue++] += yCoord[i]*getValue(i, j);
-                gridValue[i][curValue++] += zCoord[i]*getValue(i, j);
+                while( shellNumber[curFnc] == (j+1) )
+                {
+                    value += getValue(curFnc, R);
+                    curFnc++;
+                }
+                gridValue[i][curValue++] = xCoord[i]*value;
+                gridValue[i][curValue++] = yCoord[i]*value;
+                gridValue[i][curValue++] = zCoord[i]*value;
+            }
+
+            if( shellCord[j].ang == 2 )
+            {
+                gridValue[i][curValue++] = 10;
+                gridValue[i][curValue++] = 10;
+                gridValue[i][curValue++] = 10;
+                gridValue[i][curValue++] = 10;
+                gridValue[i][curValue++] = 10;
+                gridValue[i][curValue++] = 10;
             }
         }
     }
 }
 
-double Grid::getValue(int curPt, int curShell)
+double Grid::getValue(int curFnc, double R)
 {
+    return 1;
+}
 
+double Grid::getR(int curPt, int curShell)
+{
+    return (xCoord[curPt] - shellCord[curShell].x)*(xCoord[curPt] - shellCord[curShell].x) +
+    (yCoord[curPt] - shellCord[curShell].y)*(yCoord[curPt] - shellCord[curShell].y) +
+    (zCoord[curPt] - shellCord[curShell].z)*(zCoord[curPt] - shellCord[curShell].z);
 }
 // print
 void Grid::printGrid()
 {
+    std::cout << "Contracted Functions: " << numFnc << "\n";
+    std::cout << "Points: " << numPoints << "\n";
     for( int i = 0; i < numPoints; i++ )
     {
+        std::cout << "Point " << i+1 << "\n";
         std::cout << xCoord[i] << "\t" << yCoord[i] << "\t" << zCoord[i] << "\t";
         for( int j = 0; j < numFnc; j++ )
         {
