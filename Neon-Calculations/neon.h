@@ -21,6 +21,8 @@ protected:
     int shellFunction[25];
     static double exponent[25];
     static double coefficient[25];
+    void setShell(int curShell, int sAng, double sx, double sy, double sz);
+    void printShell();
 };
 
 #endif
