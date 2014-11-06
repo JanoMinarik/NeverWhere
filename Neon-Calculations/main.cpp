@@ -1,7 +1,6 @@
 #include <iostream>
 #include <ctime>
-#include "Neon.h"
-#include "Grid.h"
+#include "grid.h"
 
 using namespace std;
 
