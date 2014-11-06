@@ -1,13 +1,10 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-// my libraries
-// #include <grid.h>
-// #include <input.h>
 
 using namespace std;
 const double tollerance = 1e-10;
-unsigned int gridSize = 10;
+unsigned int gridSize = 5;
 
 // holds information about an atom
 struct atom
@@ -47,6 +44,7 @@ grid::grid()
     gridCoordinateX = new double[gridSize];
     gridCoordinateY = new double[gridSize];
     gridCoordinateZ = new double[gridSize];
+
     gridValue = new double**[gridSize];
     for( int i = 0; i < gridSize; i++ )
     {
@@ -78,7 +76,8 @@ grid::~grid()
 // functions
 double grid::getR(double rx, double ry, double rz)
 {
-    return ((rx - gridAtom.Ax)*(rx - gridAtom.Ax)) + ((ry - gridAtom.Ay)*(ry - gridAtom.Ay)) + ((rz - gridAtom.Az)*(rz - gridAtom.Az));
+    double R = ((rx - gridAtom.Ax)*(rx - gridAtom.Ax)) + ((ry - gridAtom.Ay)*(ry - gridAtom.Ay)) + ((rz - gridAtom.Az)*(rz - gridAtom.Az));
+    return R;
 }
 
 double grid::sType(double rx, double ry, double rz, int curAo)
@@ -118,23 +117,18 @@ void grid::printGrid2D()
 
     for(int i = 0; i < gridSize; i++)
     {
-        cout << setprecision(3) << gridCoordinateY[i] << ":\t";
         for(int j = 0; j < gridSize; j++)
         {
+            cout << setprecision(3) << gridCoordinateX[i] << "\t";
+            cout << setprecision(3) << gridCoordinateY[j] << "\t";
             ptValue = 0;
-            for(int k = 0; k < gridSize; k++)
+            for(int k = 0; k < 1; k++)
             {
                 ptValue += gridValue[i][j][k];
             }
-            cout << setprecision(5) << ptValue << "\t";
+            cout << setprecision(5) << ptValue << "\n";
         }
-        cout << "\n";
     }
-
-    cout << "y/x\t";
-    for(int j = 0; j < gridSize; j++)
-        cout << setprecision(3) << gridCoordinateX[j] << "\t";
-    cout << "\n";
 }
 
 // functions for pseudo generation of grid
@@ -176,7 +170,7 @@ int main()
     myGrid.gridAtom.Ax = 0.4;
     myGrid.gridAtom.Ay = 0.5;
     myGrid.gridAtom.Az = 0.6;
-    myGrid.gridAtom.numBasis = 1;
+    myGrid.gridAtom.numBasis = 3;
     myGrid.gridAtom.coeficient = new double[3];
     myGrid.gridAtom.exponent = new double[3];
     myGrid.gridAtom.basisTypes = new char[3];
@@ -196,5 +190,5 @@ int main()
     myGrid.calcGrid();
     myGrid.printGrid2D();
 
-    return 1;
+    return 0;
 }
