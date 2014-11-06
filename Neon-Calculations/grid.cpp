@@ -2,11 +2,12 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 void Grid::setGrid(int num)
 {
     numPoints = num;
-    numFnc = 15;
+    numFnc = getNumFnc();
     xCoord = new double[num];
     yCoord = new double[num];
     zCoord = new double[num];
@@ -100,12 +101,17 @@ void Grid::calcGrid()
 
             if( shellCord[j].ang == 2 )
             {
-                gridValue[i][curValue++] = 10;
-                gridValue[i][curValue++] = 10;
-                gridValue[i][curValue++] = 10;
-                gridValue[i][curValue++] = 10;
-                gridValue[i][curValue++] = 10;
-                gridValue[i][curValue++] = 10;
+                while( shellNumber[curFnc] == (j+1) )
+                {
+                    value += getValue(curFnc, R);
+                    curFnc++;
+                }
+                gridValue[i][curValue++] = xCoord[i]*xCoord[i]*value;
+                gridValue[i][curValue++] = yCoord[i]*yCoord[i]*value;
+                gridValue[i][curValue++] = zCoord[i]*zCoord[i]*value;
+                gridValue[i][curValue++] = xCoord[i]*yCoord[i]*value;
+                gridValue[i][curValue++] = xCoord[i]*zCoord[i]*value;
+                gridValue[i][curValue++] = yCoord[i]*zCoord[i]*value;
             }
         }
     }
@@ -113,7 +119,7 @@ void Grid::calcGrid()
 
 double Grid::getValue(int curFnc, double R)
 {
-    return 1;
+    return coefficient[curFnc]*exp(-1*exponent[curFnc]*R);
 }
 
 double Grid::getR(int curPt, int curShell)
@@ -129,12 +135,11 @@ void Grid::printGrid()
     std::cout << "Points: " << numPoints << "\n";
     for( int i = 0; i < numPoints; i++ )
     {
-        std::cout << "Point " << i+1 << "\n";
-        std::cout << xCoord[i] << "\t" << yCoord[i] << "\t" << zCoord[i] << "\t";
+        std::cout << "Point " << i+1 << "\n" << "Coordinates: \n";
+        std::cout << xCoord[i] << "\t" << yCoord[i] << "\t" << zCoord[i] << "\nContracted Functions:\n";
         for( int j = 0; j < numFnc; j++ )
         {
-            std::cout << gridValue[i][j] << "\t";
+            std::cout << gridValue[i][j] << "\n";
         }
-        std::cout << "\n";
     }
 }
