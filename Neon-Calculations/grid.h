@@ -13,6 +13,7 @@ public:
     void setCoord(int, double, double, double);
     void calcGrid();
     void printGrid();
+    double getValue(int curFnc, double R);
 
 protected:
     double *xCoord;
