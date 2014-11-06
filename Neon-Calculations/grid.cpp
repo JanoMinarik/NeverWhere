@@ -79,6 +79,8 @@ void Grid::calcGrid()
 
             if( shellCord[j].ang == 0 )
             {
+                // FIXME this code is repeated and independent of angular
+                // momentum and can thus be moved out
                 while( shellNumber[curFnc] == (j+1) )
                 {
                     value += getValue(curFnc, R);
