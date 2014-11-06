@@ -39,12 +39,12 @@ Neon::Neon()
     int ang;
     for(int i = 0; i < 6; i++)
     {
-        if(i <= 3)
-            ang = 1;
-        else if(i == 5)
-            ang = 2;
-        else
+        if(i < 3)
             ang = 0;
+        else if(i < 5)
+            ang = 1;
+        else
+            ang = 2;
         setShell(i, ang, 0, 0, 0);
     }
 }
@@ -59,6 +59,15 @@ void Neon::printNeon()
         cout << shellFunction[i] << "\t\t";
         cout << exponent[i] << "\t\t";
         cout << coefficient[i] << "\n";
+    }
+}
+
+void Neon::printShell()
+{
+    std::cout << "shell \n";
+    for( int i = 0; i < 6; i++ )
+    {
+        std::cout << i+1 << "\t" << shellCord[i].ang << "\t" << shellCord[i].x << "\t" << shellCord[i].y << "\t" << shellCord[i].z << "\n";
     }
 }
 
