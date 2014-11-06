@@ -76,26 +76,19 @@ void Grid::calcGrid()
         {
             R = getR(i, j);
             value = 0;
-
-            if( shellCord[j].ang == 0 )
-            {
-                // FIXME this code is repeated and independent of angular
-                // momentum and can thus be moved out
-                while( shellNumber[curFnc] == (j+1) )
+            while( shellNumber[curFnc] == (j+1) )
                 {
                     value += getValue(curFnc, R);
                     curFnc++;
                 }
+
+            if( shellCord[j].ang == 0 )
+            {
                 gridValue[i][curValue++] = value;
             }
 
             if( shellCord[j].ang == 1 )
             {
-                while( shellNumber[curFnc] == (j+1) )
-                {
-                    value += getValue(curFnc, R);
-                    curFnc++;
-                }
                 gridValue[i][curValue++] = xCoord[i]*value;
                 gridValue[i][curValue++] = yCoord[i]*value;
                 gridValue[i][curValue++] = zCoord[i]*value;
@@ -103,11 +96,6 @@ void Grid::calcGrid()
 
             if( shellCord[j].ang == 2 )
             {
-                while( shellNumber[curFnc] == (j+1) )
-                {
-                    value += getValue(curFnc, R);
-                    curFnc++;
-                }
                 gridValue[i][curValue++] = xCoord[i]*xCoord[i]*value;
                 gridValue[i][curValue++] = yCoord[i]*yCoord[i]*value;
                 gridValue[i][curValue++] = zCoord[i]*zCoord[i]*value;
