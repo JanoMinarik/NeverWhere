@@ -4,16 +4,18 @@
 #include <time.h>
 #include <math.h>
 
-void Grid::setGrid(int num)
+void Grid::setGrid(int numN, int numP)
 {
-    numPoints = num;
+    numNeons = numN;
+    numPoints = numP;
     numFnc = getNumFnc();
-    xCoord = new double[num];
-    yCoord = new double[num];
-    zCoord = new double[num];
-    gridValue = new double*[num];
+    gridNeons = new Neon[numNeons];
+    xCoord = new double[numPoints];
+    yCoord = new double[numPoints];
+    zCoord = new double[numPoints];
+    gridValue = new double*[numPoints];
 
-    for( int i = 0; i < num; i++ )
+    for( int i = 0; i < numPoints; i++ )
     {
         gridValue[i] = new double[numFnc];
     }
@@ -25,6 +27,7 @@ void Grid::unsetGrid()
     delete [] xCoord;
     delete [] yCoord;
     delete [] zCoord;
+    delete [] gridNeons;
 
     for( int i = 0; i < numPoints; i++ )
     {
@@ -35,26 +38,32 @@ void Grid::unsetGrid()
 
 int Grid::getNumFnc() {
     int count = 0;
+
     for( int i = 0; i < 6; i++ )
     {
-        if( shellCord[i].ang == 0 )
+        if( gridNeons[0].shellCord[i].ang == 0 )
             count += 1;
-        if( shellCord[i].ang == 1 )
+        if( gridNeons[0].shellCord[i].ang == 1 )
             count += 3;
-        if( shellCord[i].ang == 2 )
+        if( gridNeons[0].shellCord[i].ang == 2 )
             count += 6;
     }
 
     return count;
 }
+// set grid Atoms
+void Grid::setNeon(int curAt, double x, double y, double z)
+{
+
+}
 // generate coordinates randomly
-void Grid::setCoord()
+void Grid::setCoord(int range)
 {
     for( int i = 0; i < numPoints; i++ )
     {
-        xCoord[i] = (double)rand() / RAND_MAX;
-        yCoord[i] = (double)rand() / RAND_MAX;
-        zCoord[i] = (double)rand() / RAND_MAX;
+        xCoord[i] = range*(double)rand() / RAND_MAX;
+        yCoord[i] = range*(double)rand() / RAND_MAX;
+        zCoord[i] = range*(double)rand() / RAND_MAX;
     }
 }
 // set coordinates manualy
@@ -107,16 +116,16 @@ void Grid::calcGrid()
     }
 }
 
-double Grid::getValue(int curFnc, double R)
+double Grid::getValue(int curAt, int curFnc, double R)
 {
-    return coefficient[curFnc]*exp(-1*exponent[curFnc]*R);
+    return gridNeons[curAt].coefficient[curFnc]*exp(-1*gridNeons[curAt].exponent[curFnc]*R);
 }
 
-double Grid::getR(int curPt, int curShell)
+double Grid::getR(int curAt, int curPt, int curShell)
 {
-    return (xCoord[curPt] - shellCord[curShell].x)*(xCoord[curPt] - shellCord[curShell].x) +
-    (yCoord[curPt] - shellCord[curShell].y)*(yCoord[curPt] - shellCord[curShell].y) +
-    (zCoord[curPt] - shellCord[curShell].z)*(zCoord[curPt] - shellCord[curShell].z);
+    return (xCoord[curPt] - gridNeons[curAt].shellCord[curShell].x)*(xCoord[curPt] - gridNeons[curAt].shellCord[curShell].x) +
+    (yCoord[curPt] - gridNeons[curAt].shellCord[curShell].y)*(yCoord[curPt] - gridNeons[curAt].shellCord[curShell].y) +
+    (zCoord[curPt] - gridNeons[curAt].shellCord[curShell].z)*(zCoord[curPt] - gridNeons[curAt].shellCord[curShell].z);
 }
 // print
 void Grid::printGrid()
