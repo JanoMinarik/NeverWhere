@@ -2,18 +2,20 @@
 #define __grid_H_INCLUDED__
 #include "neon.h"
 
-class Grid : Neon
+class Grid
 {
 public:
+    int numNeons;
     int numPoints;
     int numFnc;
-    void setGrid(int);
+    Neon *gridNeons;
+    void setGrid(int, int);
     void unsetGrid();
-    void setCoord();
+    void setCoord(int);
     void setCoord(int, double, double, double);
+    void setNeon(int, double, double, double);
     void calcGrid();
     void printGrid();
-    double getValue(int curFnc, double R);
 
 protected:
     double *xCoord;
@@ -21,8 +23,8 @@ protected:
     double *zCoord;
     double **gridValue;
     int getNumFnc();
-    double getR(int, int);
-    double getValue(int, int);
+    double getR(int, int, int);
+    double getValue(int, int, double);
 };
 
 #endif
