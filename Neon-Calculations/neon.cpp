@@ -55,7 +55,7 @@ void Neon::printNeon()
     for ( int i = 0; i < 25; i++ )
     {
         cout << shellNumber[i] << "\t";
-        cout << shellCord[shellNumber[i]-1].ang << "\t";
+        //cout << shellCord[shellNumber[i]-1].ang << "\t";
         cout << shellFunction[i] << "\t\t";
         cout << exponent[i] << "\t\t";
         cout << coefficient[i] << "\n";
