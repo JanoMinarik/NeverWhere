@@ -1,36 +1,33 @@
 #include <iostream>
 #include <ctime>
+#include "neon.h"
 #include "grid.h"
 
 using namespace std;
 
 int main()
 {
-    //Neon myNeon;
-    //myNeon.printNeon();
-    //myNeon.printShell();
+    /// to test Neon initialization and data
+    /*Neon myNeon;
+    myNeon.printNeon();
+    myNeon.printShell();*/
 
     std::cout << "Grid:\n";
     Grid myGrid;
 
-    ///first scenario - 2 different points
+    ///first scenario - 2 different Neons in grid
+    /// pt 9 - longest distance, pt 10 - on the moon
     clock_t start = clock();
-    myGrid.setGrid(2);
-    myGrid.setCoord();
-    myGrid.setCoord(1, 1.5, 1.5, 1.5);
+    myGrid.setGrid(2, 10);
+    myGrid.setCoord(2);
+    myGrid.setNeon(1, 2, 2, 2);
+    myGrid.setCoord(8, 5, 5, 5);
+    myGrid.setCoord(9, 1000, 1000, 1000);
     myGrid.calcGrid();
     clock_t finish = clock();
-    myGrid.printGrid();
-    cout << "Grid initialization and calculation time: " << (finish-start) << " ns\n";
 
-    ///second scenario - 1 point on the Moon
-    start = clock();
-    myGrid.setCoord(1, 1500, 1500, 1500);
-    myGrid.calcGrid();
-    finish = clock();
     myGrid.printGrid();
-    cout << "Grid initialization and calculation time: " << (finish-start) << " ns\n";
-
+    cout << "Grid initialization and calculation time: " << (finish-start) << " ms\n";
     myGrid.unsetGrid();
 
     return 0;
