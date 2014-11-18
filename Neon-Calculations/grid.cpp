@@ -48,15 +48,26 @@ int Grid::getNumFnc() {
         if( gridNeons[0].shellCord[i].ang == 2 )
             count += 6;
     }
-
+    if( count < 15 ) count = 15;
     return count;
 }
-// set grid Atoms
+/// set grid Atoms
 void Grid::setNeon(int curAt, double x, double y, double z)
 {
+    int ang;
 
+    for( int i = 0; i < 6; i++ )
+    {
+        if(i < 3)
+            ang = 0;
+        else if(i < 5)
+            ang = 1;
+        else
+            ang = 2;
+        gridNeons[curAt].setShell(i, ang, x, y, z);
+    }
 }
-// generate coordinates randomly
+/// generate coordinates randomly
 void Grid::setCoord(int range)
 {
     for( int i = 0; i < numPoints; i++ )
@@ -73,44 +84,63 @@ void Grid::setCoord(int curPt, double x, double y, double z)
     yCoord[curPt] = y;
     zCoord[curPt] = z;
 }
-// calculate energy at given points
+/// calculate energy at given points
 void Grid::calcGrid()
 {
     int curValue, curFnc;
     double value, R;
-    for( int i = 0; i < numPoints; i++ )
+    for( int curPt = 0; curPt < numPoints; curPt++ )
     {
-        curValue = curFnc = 0;
-        for( int j = 0; j < 6; j++ )
+        for( int curAt = 0; curAt < numNeons; curAt++ )
         {
-            R = getR(i, j);
-            value = 0;
-            while( shellNumber[curFnc] == (j+1) )
+            curValue = curFnc = 0;
+            for( int j = 0; j < 6; j++ ) /// j =  curShell
+            {
+                R = getR(curAt, curPt, j);
+                value = 0;
+                while( gridNeons[curAt].shellNumber[curFnc] == (j+1) )
                 {
-                    value += getValue(curFnc, R);
+                    value += getValue(curAt, curFnc, R);
                     curFnc++;
                 }
 
-            if( shellCord[j].ang == 0 )
-            {
-                gridValue[i][curValue++] = value;
-            }
+                if( gridNeons[curAt].shellCord[j].ang == 0 )
+                {
+                    if( curAt == 0 ){ gridValue[curPt][curValue++] = value;}
+                    else{ gridValue[curPt][curValue++] += value; }
+                }
 
-            if( shellCord[j].ang == 1 )
-            {
-                gridValue[i][curValue++] = xCoord[i]*value;
-                gridValue[i][curValue++] = yCoord[i]*value;
-                gridValue[i][curValue++] = zCoord[i]*value;
-            }
+                if( gridNeons[curAt].shellCord[j].ang == 1 )
+                {
+                    if( curAt == 0 ){
+                        gridValue[curPt][curValue++] = xCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = yCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = zCoord[curPt]*value;
+                    }else{
+                        gridValue[curPt][curValue++] += xCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += yCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += zCoord[curPt]*value;
+                    }
+                }
 
-            if( shellCord[j].ang == 2 )
-            {
-                gridValue[i][curValue++] = xCoord[i]*xCoord[i]*value;
-                gridValue[i][curValue++] = yCoord[i]*yCoord[i]*value;
-                gridValue[i][curValue++] = zCoord[i]*zCoord[i]*value;
-                gridValue[i][curValue++] = xCoord[i]*yCoord[i]*value;
-                gridValue[i][curValue++] = xCoord[i]*zCoord[i]*value;
-                gridValue[i][curValue++] = yCoord[i]*zCoord[i]*value;
+                if( gridNeons[curAt].shellCord[j].ang == 2 )
+                {
+                    if( curAt == 0 ){
+                        gridValue[curPt][curValue++] = xCoord[curPt]*xCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = yCoord[curPt]*yCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = zCoord[curPt]*zCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = xCoord[curPt]*yCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = xCoord[curPt]*zCoord[curPt]*value;
+                        gridValue[curPt][curValue++] = yCoord[curPt]*zCoord[curPt]*value;
+                    }else{
+                        gridValue[curPt][curValue++] += xCoord[curPt]*xCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += yCoord[curPt]*yCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += zCoord[curPt]*zCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += xCoord[curPt]*yCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += xCoord[curPt]*zCoord[curPt]*value;
+                        gridValue[curPt][curValue++] += yCoord[curPt]*zCoord[curPt]*value;
+                    }
+                }
             }
         }
     }
@@ -127,7 +157,7 @@ double Grid::getR(int curAt, int curPt, int curShell)
     (yCoord[curPt] - gridNeons[curAt].shellCord[curShell].y)*(yCoord[curPt] - gridNeons[curAt].shellCord[curShell].y) +
     (zCoord[curPt] - gridNeons[curAt].shellCord[curShell].z)*(zCoord[curPt] - gridNeons[curAt].shellCord[curShell].z);
 }
-// print
+/// print
 void Grid::printGrid()
 {
     std::cout << "Contracted Functions: " << numFnc << "\n";
