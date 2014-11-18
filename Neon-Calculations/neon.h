@@ -1,5 +1,5 @@
-#ifndef __Neon_H_INCLUDED__
-#define __Neon_H_INCLUDED__
+#ifndef __neon_H_INCLUDED__
+#define __neon_H_INCLUDED__
 struct shell {
     int ang;
     double x;
