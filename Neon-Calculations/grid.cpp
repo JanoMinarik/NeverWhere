@@ -8,8 +8,8 @@ void Grid::setGrid(int numN, int numP)
 {
     numNeons = numN;
     numPoints = numP;
-    numFnc = getNumFnc();
     gridNeons = new Neon[numNeons];
+    numFnc = getNumFnc();
     xCoord = new double[numPoints];
     yCoord = new double[numPoints];
     zCoord = new double[numPoints];
@@ -48,7 +48,7 @@ int Grid::getNumFnc() {
         if( gridNeons[0].shellCord[i].ang == 2 )
             count += 6;
     }
-    if( count < 15 ) count = 15;
+
     return count;
 }
 /// set grid Atoms
