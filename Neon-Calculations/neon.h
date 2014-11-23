@@ -24,3 +24,4 @@ public:
     static double coefficient[25];
 };
 #endif
+
