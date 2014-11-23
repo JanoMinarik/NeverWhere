@@ -77,7 +77,7 @@ void Grid::setCoord(int range)
         zCoord[i] = range*(double)rand() / RAND_MAX;
     }
 }
-// set coordinates manualy
+/// set coordinates manualy
 void Grid::setCoord(int curPt, double x, double y, double z)
 {
     xCoord[curPt] = x;
