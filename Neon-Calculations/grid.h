@@ -1,5 +1,5 @@
-#ifndef __grid_H_INCLUDED__
-#define __grid_H_INCLUDED__
+#ifndef __Grid_H_INCLUDED__
+#define __Grid_H_INCLUDED__
 #include "neon.h"
 
 class Grid
