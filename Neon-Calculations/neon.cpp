@@ -1,4 +1,4 @@
-#include "neon.h"
+#include "Neon.h"
 #include <iostream>
 using namespace std;
 double Neon::exponent[25] = {1.788e4, 2.683e3, 6.115e2, 1.735e2, 5.664e1, 2.042e1, 7.81, 1.653, 4.869e-1,
@@ -55,7 +55,6 @@ void Neon::printNeon()
     for ( int i = 0; i < 25; i++ )
     {
         cout << shellNumber[i] << "\t";
-        //cout << shellCord[shellNumber[i]-1].ang << "\t";
         cout << shellFunction[i] << "\t\t";
         cout << exponent[i] << "\t\t";
         cout << coefficient[i] << "\n";
