@@ -72,5 +72,13 @@ int main( void ) {
         printf("%f \n", R[i]);
     }
 
+    cudaFree( dev_x );
+    cudaFree( dev_y );
+    cudaFree( dev_z );
+    cudaFree( dev_ax );
+    cudaFree( dev_ay );
+    cudaFree( dev_az );
+    cudaFree( dev_R );
+    
     return 0;
 }
