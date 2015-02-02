@@ -1,14 +1,7 @@
-What's this depository ?
-===========================
-Used for playing with Git in my own sandbox.
-
-What's here ?
-=============
-1. code that I wrote while learning calculations
-2. TeX files I use in my DT
-
-Neon:
-=====
-1. Neon.h = hold data for Neon
-2. Grid.h = hold class with methods for grid calculations
-3. Main.cpp = test scenario
+Repository Structure:
+1. NeonCalculation = C++ code for calculation of grid value of arbitrary number of Neons. Development stopped.
+2. GridCalculation = C/C++ code forcalculation of grid energy. Currently under development.
+2.1. src = sequential source codes
+2.2. srcc = cuda source codes
+2.3. input = input files for various atoms (Ne, H)
+2.4. main = sample main file, with scenario for Ne's.
