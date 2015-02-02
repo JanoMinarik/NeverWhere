@@ -1,4 +1,5 @@
 Repository Structure:
+=====================
 1. NeonCalculation = C++ code for calculation of grid value of arbitrary number of Neons. Development stopped.
 2. GridCalculation = C/C++ code forcalculation of grid energy. Currently under development.
 2.1. src = sequential source codes
