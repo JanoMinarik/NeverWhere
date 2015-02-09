@@ -65,7 +65,7 @@ void grid::setAtom(int angs[],
     gridAtom.atomShell[i].z = zs[i];
   }
 
-  for(int i=0; i<gridAtom.noFnc(); i++){
+  for(int i=0; i<gridAtom.noFnc; i++){
     gridAtom.exp[i] = exps[i];
     gridAtom.coef[i] = coefs[i];
   }
@@ -90,7 +90,7 @@ void grid::setExp(double arr[]){
 }
 
 void grid::setCoef(double arr[]){
-  for(int i=0; i<gridAtom.noFnc(); i++){
+  for(int i=0; i<gridAtom.noFnc; i++){
     gridAtom.coef[i] = arr[i];
   }
 }
@@ -131,14 +131,15 @@ void grid::setCoord(int curPt, double x, double y, double z)
 /// print grid
 void grid::printGrid(){
   for(int i=0; i<noPoints; i++){
-    std::cout << xCoord[i] << " " << yCoord[i] << " " << zCoord[i] << "\n";
+    std::cout << xCoord[i] << " " << yCoord[i] << " " << zCoord[i] << " ";
+    std::cout << gridDensity[i] << "\n";
   }
 }
 
 void grid::printFullGrid(){
   for(int i=0; i<noPoints; i++){
     std::cout << xCoord[i] << " " << yCoord[i] << " " << zCoord[i] << " ";
-    for(int j=0; j<getNoFnc; j++){
+    for(int j=0; j<getNoFnc(); j++){
       std::cout << gridValue[i][j] << " ";
     }
     std::cout << gridDensity[i] << "\n";
@@ -191,10 +192,10 @@ void grid::calcGrid()
 
 void grid::calcDensity(){
   for(int p=0; p<noPoints; p++){
-    gridDensity[p] = 0;
-    for(int k=0; k<getNoFnc; k++){
+    gridDensity[p] = 0.0;
+    for(int k=0; k<getNoFnc(); k++){
       for(int l=0; l<k; l++){
-//        gridDensity[p] += gridValue[k]*gridValue[l];
+        gridDensity[p] += gridValue[p][k]*gridValue[p][l];
       }
     }
   }

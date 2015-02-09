@@ -9,7 +9,6 @@ in cube of 8x8x8 atomic units.
 insert destination of your compiler below:
 '''
 #!/usr/bin/python
-from ctypes.wintypes import DOUBLE
 
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
@@ -35,11 +34,8 @@ class atom:
                 continue;
             if(not self.representsInt(line[0])):
                 continue;
-            if(line[1] == ' '):
-                args = line.split(' ');
-            else:
-                args = line.split('\t');
-            if(cnt < self.noShells):
+            args = line.split(' ');
+	    if(cnt < self.noShells):
                 self.ang.append(int(args[1]));
                 self.x.append(float(args[2]));
                 self.y.append(float(args[3]));
@@ -69,7 +65,7 @@ class atom:
             return False
             
 myAtom = atom(6, 25);
-myAtom.readData("neon.txt");
+myAtom.readData("./input/neon.txt");
 gridName = 'myGrid';
 gridPts = 100;
 ptStart = 0;
