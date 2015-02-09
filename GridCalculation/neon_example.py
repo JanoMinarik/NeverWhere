@@ -3,13 +3,13 @@ Created on 02 Feb, 2015
 
 @author: Jano Minarik
 
-Python script for build main.cpp with following setup:
-1 Neons in 100pt grid.
-Neon is placed at 0-0-0 coordinates.
-Points are distributed randomly.
-Please check if destination of your Python compiler is same as mine.
+Scenario:
+one Neon atom in grid of 100 points distributed equaly
+in cube of 8x8x8 atomic units.
+insert destination of your compiler below:
 '''
 #!/usr/bin/python
+from ctypes.wintypes import DOUBLE
 
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
@@ -40,15 +40,15 @@ class atom:
             else:
                 args = line.split('\t');
             if(cnt < self.noShells):
-                self.ang.append(args[1]);
-                self.x.append(args[2]);
-                self.y.append(args[3]);
-                self.z.append(args[4]);
+                self.ang.append(int(args[1]));
+                self.x.append(float(args[2]));
+                self.y.append(float(args[3]));
+                self.z.append(float(args[4]));
             else:
-                self.shellNo.append(args[0]);
-                self.shellFnc.append(args[1]);
-                self.exp.append(args[2]);
-                self.coef.append(args[2]);
+                self.shellNo.append(int(args[0]));
+                self.shellFnc.append(int(args[1]));
+                self.exp.append(float(args[2]));
+                self.coef.append(float(args[2]));
             cnt += 1;
             
     def displayData(self):
@@ -70,35 +70,59 @@ class atom:
             
 myAtom = atom(6, 25);
 myAtom.readData("neon.txt");
-
-# parameters for grid
 gridName = 'myGrid';
-gridAts = 1;
 gridPts = 100;
-ptRange = 3;
+ptStart = 0;
+ptEnd = 8;
+noShl = len(myAtom.ang);
+noFnc = len(myAtom.coef);
 
 # myAtom.displayData();
 # include libraries
-main = '''#include <stdio.h>
-#include <ctime>
-#include "atom.h"
+main = '''#include "atom.h"
 #include "grid.h"
 \nint main(){
 '''
 
 # initialize grid
 main += '  grid %s;\n' % gridName
-main += '  %s.setGrid(%d, %d);\n\n' % (gridName, gridAts, gridPts)
+main += '  %s.setGrid(%d);\n\n' % (gridName, gridPts)
 
-# set atoms
-for i in range(0, gridAts):
-    for j in range(0, myAtom.noShells):
-        main += '  %s.setAtom[%d](%d, %s, %s, %s, %s);\n' % (gridName, i, j, myAtom.ang[i], myAtom.x[i], myAtom.y[i], myAtom.z[i]);
+# set atom
+main += '  int shellNos [] = {'
+for i in range(0, len(myAtom.shellNo)):
+    main += '%s, ' % (myAtom.shellNo[i])
+main += '};\n'
+main += '  int shellFncs [] = {'
+for i in range(0, len(myAtom.shellFnc)):
+    main += '%s, ' % (myAtom.shellFnc[i])
+main += '};\n'
+main += '  double shellCoefs [] = {'
+for i in range(0, len(myAtom.coef)):
+    main += '%s, ' % (myAtom.coef[i])
+main += '};\n'
+main += '  double shellExps [] = {'
+for i in range(0, len(myAtom.exp)):
+    main += '%s, ' % (myAtom.exp[i])
+main += '};\n\n'
+
+main += '  %s.initAtom(%s, %s);\n' % (gridName, noShl, noFnc)
+main += '  %s.setShellNumber(shellNos);\n' % (gridName)
+main += '  %s.setShellFunction(shellFncs);\n' % (gridName)
+main += '  %s.setExp(shellCoefs);\n' % (gridName)
+main += '  %s.setCoef(shellExps);\n' % (gridName)
+
+# set atom shells
+for i in range(0, noShl):
+    main += '  %s.setShell(%d, %s, %s, %s, %s);\n' % (gridName ,i, myAtom.ang[i], myAtom.x[i], myAtom.y[i], myAtom.z[i])
+
+# set points to equidistant range
+main += '\n  %s.setCoord(%d, %d);\n' % (gridName, ptStart, ptEnd)
 
 # calculate grid and write output to file "output.txt"
 main += '''
   %s.calcGrid();
-  %s.printGrid2File();
+  %s.printGrid();
 ''' %(gridName, gridName)
 main += '  return 0;\n}'
 
