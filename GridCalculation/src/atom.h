@@ -19,8 +19,6 @@ struct atom {
     double *exp;
 };
 
-void initAtom(atom, int, int);
-void fillAtom(atom, int[], double[], double[], double[], double[], double[]);
 void printAtom(atom);
 
 #endif
