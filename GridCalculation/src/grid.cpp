@@ -65,7 +65,7 @@ void grid::setAtom(int angs[],
     gridAtom.atomShell[i].z = zs[i];
   }
 
-  for(int i=0; i<gridAtom.noFnc; i++){
+  for(int i=0; i<gridAtom.noFnc(); i++){
     gridAtom.exp[i] = exps[i];
     gridAtom.coef[i] = coefs[i];
   }
@@ -90,7 +90,7 @@ void grid::setExp(double arr[]){
 }
 
 void grid::setCoef(double arr[]){
-  for(int i=0; i<gridAtom.noFnc; i++){
+  for(int i=0; i<gridAtom.noFnc(); i++){
     gridAtom.coef[i] = arr[i];
   }
 }
