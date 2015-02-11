@@ -1,4 +1,4 @@
-# Neon basis set input file
+# Neon cc-pVDZ basis set input file
 # 6 shells and coresponding 25 contraction functions
 shell ang x y z
 1 0 0.000 0.000 0.000
