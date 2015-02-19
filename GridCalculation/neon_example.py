@@ -44,7 +44,7 @@ class atom:
                 self.shellNo.append(int(args[0]));
                 self.shellFnc.append(int(args[1]));
                 self.exp.append(float(args[2]));
-                self.coef.append(float(args[2]));
+                self.coef.append(float(args[3]));
             cnt += 1;
             
     def displayData(self):
@@ -105,8 +105,8 @@ main += '};\n\n'
 main += '  %s.initAtom(%s, %s);\n' % (gridName, noShl, noFnc)
 main += '  %s.setShellNumber(shellNos);\n' % (gridName)
 main += '  %s.setShellFunction(shellFncs);\n' % (gridName)
-main += '  %s.setExp(shellCoefs);\n' % (gridName)
-main += '  %s.setCoef(shellExps);\n' % (gridName)
+main += '  %s.setExp(shellExps);\n' % (gridName)
+main += '  %s.setCoef(shellCoefs);\n' % (gridName)
 
 # set atom shells
 for i in range(0, noShl):

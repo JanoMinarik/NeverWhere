@@ -4,6 +4,7 @@
 
 class grid{
   public:
+    // grid properites
     int noPoints;
     atom gridAtom;
     /// functions
@@ -21,20 +22,23 @@ class grid{
     void setShellFunction(int[]);
     void setExp(double[]);
     void setCoef(double[]);
-
+    // grid calculation
     void calcGrid();
-    void calcDensity();
     void printGrid();
     void printFullGrid();
-
+    // grid variables
     double *xCoord;
     double *yCoord;
     double *zCoord;
     double **gridValue;
     double *gridDensity;
+    double **densityMatrix;
+    // support functions
     double getR(int, int);
     double getValue(int, double);
     int getNoFnc();
+    void getDensityMatrix();
+    void calcDensity();
 };
 
 #endif

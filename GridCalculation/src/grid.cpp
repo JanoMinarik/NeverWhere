@@ -18,6 +18,11 @@ void grid::setGrid(int noP)
     {
         gridValue[i] = new double[gridAtom.noFnc];
     }
+    int noFnc = getNoFnc();
+    densityMatrix = new double*[noFnc];
+    for( int i = 0; i < noFnc; i++ ) {
+        densityMatrix[i] = new double[noFnc];
+    }
 }
 
 void grid::unsetGrid()
@@ -32,6 +37,11 @@ void grid::unsetGrid()
         delete [] gridValue[i];
     }
     delete gridValue;
+
+    for( int i = 0; i < getNoFnc(); i++ ){
+        delete [] densityMatrix[i];
+    }
+    delete densityMatrix;
 }
 
 /// set grid
@@ -163,7 +173,6 @@ void grid::calcGrid()
                 value += getValue(curFnc, R);
                 curFnc++;
             }
-
             if( gridAtom.atomShell[j].ang == 0 )
             {
                 gridValue[curPt][curValue++] = value;
@@ -195,8 +204,9 @@ void grid::calcDensity(){
     gridDensity[p] = 0.0;
     for(int k=0; k<getNoFnc(); k++){
       for(int l=0; l<k; l++){
-        gridDensity[p] += gridValue[p][k]*gridValue[p][l];
+        gridDensity[p] += 2*gridValue[p][k]*gridValue[p][l];
       }
+      gridDensity[p] += gridValue[p][k]*gridValue[p][k];
     }
   }
 }
@@ -209,9 +219,11 @@ double grid::getValue(int curFnc, double R)
 
 double grid::getR(int curPt, int curShell)
 {
-    return (xCoord[curPt] - gridAtom.atomShell[curShell].x)*(xCoord[curPt] - gridAtom.atomShell[curShell].x) +
-    (yCoord[curPt] - gridAtom.atomShell[curShell].y)*(yCoord[curPt] - gridAtom.atomShell[curShell].y) +
-    (zCoord[curPt] - gridAtom.atomShell[curShell].z)*(zCoord[curPt] - gridAtom.atomShell[curShell].z);
+  double dx = gridAtom.atomShell[curShell].x - xCoord[curPt];
+  double dy = gridAtom.atomShell[curShell].y - yCoord[curPt];
+  double dz = gridAtom.atomShell[curShell].z - zCoord[curPt];
+
+  return dx*dx + dy*dy + dz*dz;
 }
 
 int grid::getNoFnc(){
@@ -223,4 +235,8 @@ int grid::getNoFnc(){
     if(gridAtom.atomShell[i].ang == 3){noFnc+=10;}
   }
   return noFnc;
+}
+
+void grid::getDensityMatrix(){
+
 }
