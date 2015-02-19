@@ -12,51 +12,81 @@ insert destination of your compiler below:
 
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
-        self.noShells=noShells;
-        self.noFunctions=noFunctions;
-        self.ang = [];
-        self.x = [];
-        self.y = [];
-        self.z = [];
-        self.shellNo = [];
-        self.shellFnc = [];
-        self.exp = [];
-        self.coef = [];
+        self.noShells=noShells
+        self.noFunctions=noFunctions
+        self.ang = []
+        self.x = []
+        self.y = []
+        self.z = []
+        self.shellNo = []
+        self.shellFnc = []
+        self.exp = []
+        self.coef = []
     
     def readData(self, fileName):
-        f = open(fileName, "r");
-        cnt = 0;
+        f = open(fileName, "r")
+        cnt = 0
         while(cnt < (self.noShells+self.noFunctions)):
-            line = f.readline();
-            line = line.lstrip();
-            line = line.replace('\n','');
+            line = f.readline()
+            line = line.lstrip()
+            line = line.replace('\n','')
             if(len(line) < 1):
-                continue;
+                continue
             if(not self.representsInt(line[0])):
-                continue;
-            args = line.split(' ');
+                continue
+            args = line.split(' ')
 	    if(cnt < self.noShells):
-                self.ang.append(int(args[1]));
-                self.x.append(float(args[2]));
-                self.y.append(float(args[3]));
-                self.z.append(float(args[4]));
+                self.ang.append(int(args[1]))
+                self.x.append(float(args[2]))
+                self.y.append(float(args[3]))
+                self.z.append(float(args[4]))
             else:
-                self.shellNo.append(int(args[0]));
-                self.shellFnc.append(int(args[1]));
-                self.exp.append(float(args[2]));
-                self.coef.append(float(args[3]));
-            cnt += 1;
-            
-    def displayData(self):
-        print('Shells: ', self.ang);
-        print('x: ', self.x);
-        print('y: ', self.y);
-        print('z: ', self.z);
-        print('shell No.: ', self.shellNo);
-        print('function No.: ', self.shellFnc);
-        print('exponents: ', self.exp);
-        print('coeficients: ', self.coef);
+                self.shellNo.append(int(args[0]))
+                self.shellFnc.append(int(args[1]))
+                self.exp.append(float(args[2]))
+                self.coef.append(float(args[3]))
+            cnt += 1
+    
+    def readDensityMatrix(self, fileName):
+        if self.ang == None or len(self.ang) == 0:
+           print("Initialize data first.")
+           return 1
         
+        self.noFnc = 0
+        for a in self.ang:
+          if a == 0:
+            self.noFnc += 1
+          if a == 1:
+            self.noFnc += 3
+          if a == 2:
+            self.noFnc += 6
+          if a == 3:
+            self.noFnc += 10
+        self.densMat = [[0 for x in range(self.noFnc)] for x in range(self.noFnc) ]
+        with open(fileName) as openfileobject:
+          for line in openfileobject:
+            if(len(line)<1):
+               continue;
+            if(line[0] == '#'):
+               continue;
+            args = line.split(' ')
+            self.densMat[int(args[0])][int(args[1])] = float(args[2])
+
+    def displayData(self):
+        print('Shells: ', self.ang)
+        print('x: ', self.x)
+        print('y: ', self.y)
+        print('z: ', self.z)
+        print('shell No.: ', self.shellNo)
+        print('function No.: ', self.shellFnc)
+        print('exponents: ', self.exp)
+        print('coeficients: ', self.coef)
+        
+    def displayDensityMatrix(self):
+        for x in range(self.noFnc):
+          for y in range(self.noFnc):
+            print("%d %d %f" %(x, y, self.densMat[x][y]))
+
     def representsInt(self,s):
         try: 
             int(s)
@@ -64,16 +94,18 @@ class atom:
         except ValueError:
             return False
             
-myAtom = atom(6, 25);
-myAtom.readData("./input/neon.txt");
-gridName = 'myGrid';
-gridPts = 100;
-ptStart = 0;
-ptEnd = 8;
-noShl = len(myAtom.ang);
-noFnc = len(myAtom.coef);
+myAtom = atom(6, 25)
+myAtom.readData("./input/neon.txt")
+myAtom.readDensityMatrix("./input/dmat.txt")
+gridName = 'myGrid'
+gridPts = 100
+ptStart = 0
+ptEnd = 8
+noShl = len(myAtom.ang)
+noFnc = len(myAtom.coef)
 
 # myAtom.displayData();
+# myAtom.displayDensityMatrix();
 # include libraries
 main = '''#include "atom.h"
 #include "grid.h"
@@ -102,11 +134,20 @@ for i in range(0, len(myAtom.exp)):
     main += '%s, ' % (myAtom.exp[i])
 main += '};\n\n'
 
+main += '  double dMat[%d][%d] = {\n' %( myAtom.noFnc, myAtom.noFnc)
+for i in range(myAtom.noFnc):
+    main += '{'
+    for j in range(myAtom.noFnc):
+        main += '%f, ' % (myAtom.densMat[i][j])
+    main += '},\n' 
+main += '  };\n\n'
+
 main += '  %s.initAtom(%s, %s);\n' % (gridName, noShl, noFnc)
 main += '  %s.setShellNumber(shellNos);\n' % (gridName)
 main += '  %s.setShellFunction(shellFncs);\n' % (gridName)
 main += '  %s.setExp(shellExps);\n' % (gridName)
 main += '  %s.setCoef(shellCoefs);\n' % (gridName)
+main += '  %s.setDensityMatrix(dMat);\n' %(gridName)
 
 # set atom shells
 for i in range(0, noShl):
