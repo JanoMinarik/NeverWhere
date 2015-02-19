@@ -14,14 +14,14 @@ void grid::setGrid(int noP)
     zCoord = new double[noPoints];
     gridDensity = new double[noPoints];
     gridValue = new double*[noPoints];
+    int noAOs = getNoFnc();
     for( int i = 0; i < noPoints; i++ )
     {
-        gridValue[i] = new double[gridAtom.noFnc];
+        gridValue[i] = new double[noAOs];
     }
-    int noFnc = getNoFnc();
-    densityMatrix = new double*[noFnc];
-    for( int i = 0; i < noFnc; i++ ) {
-        densityMatrix[i] = new double[noFnc];
+    densityMatrix = new double*[noAOs];
+    for( int i = 0; i < noAOs; i++ ) {
+        densityMatrix[i] = new double[noAOs];
     }
 }
 
@@ -225,7 +225,7 @@ void grid::calcGrid()
 void grid::calcDensity(){
   for(int p=0; p<noPoints; p++){
     gridDensity[p] = 0.0;
-    for(int k=0; k<getNoFnc(); k++){
+    for(int k=0; k<15; k++){
       for(int l=0; l<k; l++){
         gridDensity[p] += 2*densityMatrix[k][l]*gridValue[p][k]*gridValue[p][l];
       }

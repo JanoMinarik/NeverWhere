@@ -6,6 +6,7 @@ class grid{
   public:
     // grid properites
     int noPoints;
+    int noAOs;
     atom gridAtom;
     /// functions
     void setGrid(int);
