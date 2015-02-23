@@ -12,9 +12,10 @@ void grid::setGrid(int noP)
     xCoord = new double[noPoints];
     yCoord = new double[noPoints];
     zCoord = new double[noPoints];
+    weight = new double[noPoints];
     gridDensity = new double[noPoints];
     gridValue = new double*[noPoints];
-    int noAOs = getNoFnc();
+    
     for( int i = 0; i < noPoints; i++ )
     {
         gridValue[i] = new double[noAOs];
@@ -53,6 +54,7 @@ void grid::initAtom(int noShl, int noFnc){
   gridAtom.shellFunction = new int[noFnc];
   gridAtom.coef = new double[noFnc];
   gridAtom.exp = new double[noFnc];
+  noAOs = getNoFnc();
 }
 
 void grid::setShell(int curShell, int ang, double x, double y, double z){
@@ -105,11 +107,10 @@ void grid::setCoef(double arr[]){
   }
 }
 
-void grid::setDensityMatrix(double arr[15][15]){
-  int n = getNoFnc();
-  for(int i=0; i<n; i++){
-    for(int j=0; j<n; j++){
-      densityMatrix[i][j] = arr[i][j];
+void grid::setDensityMatrix(double *arr){
+  for(int i=0; i<noAOs; i++){
+    for(int j=0; j<noAOs; j++){
+      densityMatrix[i][j] = *(arr + i*noAOs + j);
     }
   }
 }
@@ -120,6 +121,7 @@ void grid::setCoord(double range){
         xCoord[i] = range*(double)rand() / RAND_MAX;
         yCoord[i] = range*(double)rand() / RAND_MAX;
         zCoord[i] = range*(double)rand() / RAND_MAX;
+        weight[i] = 1.0/noPoints;
     }
 }
 
@@ -137,6 +139,7 @@ void grid::setCoord(double start, double end){
         xCoord[i] = start + i*step;
         yCoord[i] = start + i*step;
         zCoord[i] = start + i*step;
+        weight[i] = 1.0/noPoints;
     }
 }
 
@@ -156,8 +159,8 @@ void grid::printGrid(){
 }
 
 void grid::printDensityMatrix(){
-  for(int i=0; i<getNoFnc(); i++){
-    for(int j=0; j<getNoFnc(); j++){
+  for(int i=0; i<noAOs; i++){
+    for(int j=0; j<noAOs; j++){
       std::cout << densityMatrix[i][j] << " ";
     }
     std::cout << "\n";
@@ -166,13 +169,14 @@ void grid::printDensityMatrix(){
 
 void grid::printGridInfo(){
   std::cout << "no Points: " << noPoints << "\n";
-  std::cout << "no AOs: " << getNoFnc() << "\n";
+  std::cout << "no AOs: " << noAOs << "\n";
+  std::cout << "density: " << atomDensity << "\n";
 }
 
 void grid::printFullGrid(){
   for(int i=0; i<noPoints; i++){
     std::cout << xCoord[i] << " " << yCoord[i] << " " << zCoord[i] << " ";
-    for(int j=0; j<getNoFnc(); j++){
+    for(int j=0; j<noAOs; j++){
       std::cout << gridValue[i][j] << " ";
     }
     std::cout << gridDensity[i] << "\n";
@@ -223,14 +227,17 @@ void grid::calcGrid()
 }
 
 void grid::calcDensity(){
+  atomDensity = 0.0;
   for(int p=0; p<noPoints; p++){
     gridDensity[p] = 0.0;
-    for(int k=0; k<15; k++){
+    for(int k=0; k<noAOs; k++){
       for(int l=0; l<k; l++){
         gridDensity[p] += 2*densityMatrix[k][l]*gridValue[p][k]*gridValue[p][l];
       }
       gridDensity[p] += densityMatrix[k][k]*gridValue[p][k]*gridValue[p][k];
     }
+    gridDensity[p] *= weight[p];
+    atomDensity += gridDensity[p];
   }
 }
 
@@ -251,13 +258,14 @@ double grid::getR(int curPt, int curShell)
 
 int grid::getNoFnc(){
   int noFnc = 0;
-  //for(int i=0; i<gridAtom.noShl; i++){
-  //  if(gridAtom.atomShell[i].ang == 0){noFnc+=1;}
-  //  if(gridAtom.atomShell[i].ang == 1){noFnc+=3;}
-  //  if(gridAtom.atomShell[i].ang == 2){noFnc+=6;}
-  //  if(gridAtom.atomShell[i].ang == 3){noFnc+=10;}
-  //}
-  return 15;
-  //return noFnc;
+  for(int i=0; i<gridAtom.noShl; i++){
+    if(gridAtom.atomShell[i].ang == 0){noFnc+=1;}
+    if(gridAtom.atomShell[i].ang == 1){noFnc+=3;}
+    if(gridAtom.atomShell[i].ang == 2){noFnc+=6;}
+    if(gridAtom.atomShell[i].ang == 3){noFnc+=10;}
+  }
+  if(noFnc != 15)
+    return 15;
+  return noFnc;
 }
 

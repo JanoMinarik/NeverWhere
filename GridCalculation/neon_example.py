@@ -114,7 +114,6 @@ main = '''#include "atom.h"
 
 # initialize grid
 main += '  grid %s;\n' % gridName
-main += '  %s.setGrid(%d);\n\n' % (gridName, gridPts)
 
 # set atom
 main += '  int shellNos [] = {'
@@ -141,13 +140,15 @@ for i in range(myAtom.noFnc):
         main += '%f, ' % (myAtom.densMat[i][j])
     main += '},\n' 
 main += '  };\n\n'
+main += '  double *pDMat = &dMat[0][0];\n'
 
 main += '  %s.initAtom(%s, %s);\n' % (gridName, noShl, noFnc)
+main += '  %s.setGrid(%d);\n' %(gridName, gridPts)
 main += '  %s.setShellNumber(shellNos);\n' % (gridName)
 main += '  %s.setShellFunction(shellFncs);\n' % (gridName)
 main += '  %s.setExp(shellExps);\n' % (gridName)
 main += '  %s.setCoef(shellCoefs);\n' % (gridName)
-main += '  %s.setDensityMatrix(dMat);\n' %(gridName)
+main += '  %s.setDensityMatrix(pDMat);\n' %(gridName)
 
 # set atom shells
 for i in range(0, noShl):
@@ -159,8 +160,9 @@ main += '\n  %s.setCoord(%d, %d);\n' % (gridName, ptStart, ptEnd)
 # calculate grid and write output to file "output.txt"
 main += '''
   %s.calcGrid();
+  %s.printGridInfo();
   %s.printGrid();
-''' %(gridName, gridName)
+''' %(gridName, gridName, gridName)
 main += '  return 0;\n}'
 
 # print main to main.cpp

@@ -7,6 +7,7 @@ class grid{
     // grid properites
     int noPoints;
     int noAOs;
+    double atomDensity;
     atom gridAtom;
     /// functions
     void setGrid(int);
@@ -19,7 +20,7 @@ class grid{
     void setAtom(int[] ,
                  double[], double[], double[],
                  double[], double[]);
-    void setDensityMatrix(double[15][15]);
+    void setDensityMatrix(double*);
     void setShellNumber(int[]);
     void setShellFunction(int[]);
     void setExp(double[]);
@@ -34,6 +35,7 @@ class grid{
     double *xCoord;
     double *yCoord;
     double *zCoord;
+    double *weight;
     double **gridValue;
     double *gridDensity;
     double **densityMatrix;
