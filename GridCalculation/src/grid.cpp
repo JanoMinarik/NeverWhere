@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <fstream>
+
+#define PI 3.1415926
 
 /// grid memory alocation/ free.
-void grid::setGrid(int noP)
+void grid::setGrid(int nPn)
 {
-    noPoints = noP;
+    noPoints = nPn;
     xCoord = new double[noPoints];
     yCoord = new double[noPoints];
     zCoord = new double[noPoints];
@@ -116,12 +119,13 @@ void grid::setDensityMatrix(double *arr){
 }
 
 void grid::setCoord(double range){
+    double dR = range/noPoints;
     for( int i = 0; i < noPoints; i++ )
     {
         xCoord[i] = range*(double)rand() / RAND_MAX;
         yCoord[i] = range*(double)rand() / RAND_MAX;
         zCoord[i] = range*(double)rand() / RAND_MAX;
-        weight[i] = 1.0/noPoints;
+        weight[i] = 4.0*PI*getR2(i)*dR;
     }
 }
 
@@ -134,20 +138,40 @@ void grid::setCoord(double start, double end){
     }
     double step = ( end - start )/( noPoints - 1 );
 
+    double dR = (end - start)/noPoints;
     for( int i=0; i<noPoints; i++ )
     {
         xCoord[i] = start + i*step;
         yCoord[i] = start + i*step;
         zCoord[i] = start + i*step;
-        weight[i] = 1.0/noPoints;
+        weight[i] = 4.0*PI*getR2(i)*dR;
     }
 }
 
-void grid::setCoord(int curPt, double x, double y, double z)
+void grid::setCoord(int curPt, double x, double y, double z, double w)
 {
     xCoord[curPt] = x;
     yCoord[curPt] = y;
     zCoord[curPt] = z;
+    weight[curPt] = w;
+}
+
+void grid::setCoordFile(char name[]){
+  std::ifstream infile (name);
+  if(infile.is_open()){
+    double x, y, z, w;
+    for(int i=0; i<noPoints; i++){
+      infile >> x;
+      if(x == EOF){break;}
+      infile >> y;
+      infile >> z;
+      infile >> w;
+      setCoord(i, x, y, z, w);
+    }
+  }else{
+    std::cout << "Could not open file " << name << "\n";
+  }
+  infile.close(); 
 }
 
 /// print grid
@@ -183,6 +207,23 @@ void grid::printFullGrid(){
   }
 }
 
+void grid::printGridAtom(){
+  std::cout << "shells [no, ang, x, y, z]\n";
+  for(int i=0; i<gridAtom.noShl; i++){
+    std::cout << i+1 << " ";
+    std::cout << gridAtom.atomShell[i].ang << " ";
+    std::cout << gridAtom.atomShell[i].x << " ";
+    std::cout << gridAtom.atomShell[i].y << " ";
+    std::cout << gridAtom.atomShell[i].z << "\n";
+  }
+  
+  std::cout << "contraction functions [shell no, fnc no, exp, coef]\n";
+  for(int i=0; i<gridAtom.noFnc; i++){
+    std::cout << gridAtom.shellNumber[i] << " " << gridAtom.shellFunction[i] << " ";
+    std::cout << gridAtom.exp[i] << " " << gridAtom.coef[i] << "\n";
+  }
+  std::cout << "====================\n";
+}
 /// calculate grid density
 void grid::calcGrid()
 {
@@ -254,6 +295,14 @@ double grid::getR(int curPt, int curShell)
   double dz = gridAtom.atomShell[curShell].z - zCoord[curPt];
 
   return dx*dx + dy*dy + dz*dz;
+}
+
+double grid::getR2(int curPt){
+  double dx = xCoord[curPt]*xCoord[curPt];
+  double dy = yCoord[curPt]*yCoord[curPt];
+  double dz = zCoord[curPt]*zCoord[curPt];
+
+  return dx + dy + dz;
 }
 
 int grid::getNoFnc(){

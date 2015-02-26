@@ -14,7 +14,8 @@ class grid{
     void unsetGrid();
     void setCoord(double);
     void setCoord(double, double);
-    void setCoord(int, double, double, double);
+    void setCoord(int, double, double, double, double);
+    void setCoordFile(char[]);
     void initAtom(int, int);
     void setShell(int, int, double, double, double);
     void setAtom(int[] ,
@@ -31,6 +32,7 @@ class grid{
     void printFullGrid();
     void printDensityMatrix();
     void printGridInfo();
+    void printGridAtom();
     // grid variables
     double *xCoord;
     double *yCoord;
@@ -41,6 +43,7 @@ class grid{
     double **densityMatrix;
     // support functions
     double getR(int, int);
+    double getR2(int);
     double getValue(int, double);
     int getNoFnc();
     void calcDensity();
