@@ -4,7 +4,7 @@ Created on 02 Feb, 2015
 @author: Jano Minarik
 
 Scenario:
-one Neon atom in grid of 100 points distributed equaly
+one Neon atom in grid of 101 points distributed equidistantly
 in cube of 8x8x8 atomic units.
 insert destination of your compiler below:
 '''
@@ -100,7 +100,7 @@ myAtom.readDensityMatrix("./input/dmat.txt")
 gridName = 'myGrid'
 gridPts = 100
 ptStart = 0
-ptEnd = 8
+ptEnd = 10
 noShl = len(myAtom.ang)
 noFnc = len(myAtom.coef)
 
