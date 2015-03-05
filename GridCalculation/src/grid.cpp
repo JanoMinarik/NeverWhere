@@ -194,7 +194,8 @@ void grid::printDensityMatrix(){
 void grid::printGridInfo(){
   std::cout << "no Points: " << noPoints << "\n";
   std::cout << "no AOs: " << noAOs << "\n";
-  std::cout << "density: " << atomDensity << "\n";
+  //std::cout << "density: " << atomDensity << "\n";
+  printf("no electrons: %lf\n", atomDensity);
 }
 
 void grid::printFullGrid(){
@@ -264,7 +265,8 @@ void grid::calcGrid()
             }
         }
     }
-    calcDensity();
+    //calcDensity();
+    calcDensityScr();
 }
 
 void grid::calcDensity(){
@@ -279,6 +281,26 @@ void grid::calcDensity(){
     }
     gridDensity[p] *= weight[p];
     atomDensity += gridDensity[p];
+  }
+}
+
+void grid::calcDensityScr(){
+  atomDensity = 0.0;
+  double *lArr[noAOs], *rArr[noAOs];
+  double hlp[noAOs];
+
+  for(int p=0; p<noPoints; p++){
+    for(int i=0; i<noAOs; i++){lArr[i] = &gridValue[p][i];}
+    //temporary while cblas.h is not working
+    for(int i=0; i<noAOs; i++){
+      hlp[i] = 0.0;
+      for(int j=0; j<noAOs; j++){
+        hlp[i] += densityMatrix[i][j]*gridValue[p][j]; 
+      }
+      rArr[i] = &hlp[i];
+    }
+    densityScreening(lArr, rArr, p);
+    atomDensity += gridDensity[p];    
   }
 }
 
@@ -317,4 +339,49 @@ int grid::getNoFnc(){
     return 15;
   return noFnc;
 }
+// calculate density with screening
+void grid::densityScreening(double *arr1[], double *arr2[], int p){
+  int lng = noAOs;
+  double precision = 1e-10;
+  for(int i=0; i<lng; i++){
+    if(*arr1[i] < precision && *arr1[i] > -precision){
+      cleanArr(arr1, i, lng);
+      cleanArr(arr2, i, lng);
+      i--;
+      lng--;  
+    }
+  }
+  if(p < 10){
+    for(int i=0; i<lng; i++){
+      std::cout << *arr1[i]  << " ";
+    }
+  std::cout << "\n";
+    for(int i=0; i<lng; i++){
+      std::cout << *arr2[i] << " ";
+    }
+  std::cout << "\n";
+  } 
+  // temporary while cblas.h is not working
+  gridDensity[p] = tempArrMull(arr1, arr2, lng);
+}
 
+void grid::cleanArr(double *arr[], int idx, int lng){
+  double *hlp;
+  if(lng<0){return;};
+  for(int i=idx; i<lng; i++){
+    hlp = arr[i+1];
+    arr[i+1] = arr[i];
+    arr[i] = hlp;
+  }
+  arr[lng] = NULL;
+}
+
+double grid::tempArrMull(double *arr1[], double *arr2[], int lng){
+ double out = 0.0;
+ if(lng < 1){return 0.0;}; 
+
+ for(int i=0; i<lng; i++){ 
+   out+=(*arr1[i])*(*arr2[i]);
+ }
+ return out;
+}

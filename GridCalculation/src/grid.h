@@ -47,6 +47,10 @@ class grid{
     double getValue(int, double);
     int getNoFnc();
     void calcDensity();
+    void calcDensityScr();
+    void densityScreening(double*[], double*[], int);
+    void cleanArr(double*[], int, int);
+    double tempArrMull(double *[], double *[], int);
 };
 
 #endif

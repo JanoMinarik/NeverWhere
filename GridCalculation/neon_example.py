@@ -10,6 +10,8 @@ insert destination of your compiler below:
 '''
 #!/usr/bin/python
 
+import argparse
+
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
         self.noShells=noShells
@@ -93,16 +95,29 @@ class atom:
             return True
         except ValueError:
             return False
-            
+
+def cntLines(name):
+    with open(name) as f:
+       return sum(1 for _ in f)
+
+
+# Experiment Data hardcoed           
 myAtom = atom(6, 25)
 myAtom.readData("./input/neon.txt")
 myAtom.readDensityMatrix("./input/dmat.txt")
 gridName = 'myGrid'
-gridPts = 100
+gridPts = 101
 ptStart = 0
 ptEnd = 10
 noShl = len(myAtom.ang)
 noFnc = len(myAtom.coef)
+
+# Experiment Data from Parser
+parser = argparse.ArgumentParser(description='Generates main.cpp for example scenario.')
+parser.add_argument('-i', '--input', dest='ifile', default='./input/neon.txt', help='Specify input file with your atom coordinates and contration functions.')
+parser.add_argument('-o', '--output', dest='ofile', default='output.txt', help='Specify output file.')
+parser.add_argument('-g', '--grid', dest='gfile', default='None', help='Specify input file with coordinates of gridpoint and its weight.')
+parser.add_argument('-d', '--density', dest='dfile', default='./input/dmat.txt', help='Specify file with density matrix for your atom.')
 
 # myAtom.displayData();
 # myAtom.displayDensityMatrix();
