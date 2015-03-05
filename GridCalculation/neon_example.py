@@ -10,7 +10,7 @@ insert destination of your compiler below:
 '''
 #!/usr/bin/python
 
-import argparse
+#import argparse
 
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
@@ -106,18 +106,18 @@ myAtom = atom(6, 25)
 myAtom.readData("./input/neon.txt")
 myAtom.readDensityMatrix("./input/dmat.txt")
 gridName = 'myGrid'
-gridPts = 101
+gridPts = 16496
 ptStart = 0
 ptEnd = 10
 noShl = len(myAtom.ang)
 noFnc = len(myAtom.coef)
 
 # Experiment Data from Parser
-parser = argparse.ArgumentParser(description='Generates main.cpp for example scenario.')
-parser.add_argument('-i', '--input', dest='ifile', default='./input/neon.txt', help='Specify input file with your atom coordinates and contration functions.')
-parser.add_argument('-o', '--output', dest='ofile', default='output.txt', help='Specify output file.')
-parser.add_argument('-g', '--grid', dest='gfile', default='None', help='Specify input file with coordinates of gridpoint and its weight.')
-parser.add_argument('-d', '--density', dest='dfile', default='./input/dmat.txt', help='Specify file with density matrix for your atom.')
+#parser = argparse.ArgumentParser(description='Generates main.cpp for example scenario.')
+#parser.add_argument('-i', '--input', dest='ifile', default='./input/neon.txt', help='Specify input file with your atom coordinates and contration functions.')
+#parser.add_argument('-o', '--output', dest='ofile', default='output.txt', help='Specify output file.')
+#parser.add_argument('-g', '--grid', dest='gfile', default='None', help='Specify input file with coordinates of gridpoint and its weight.')
+#parser.add_argument('-d', '--density', dest='dfile', default='./input/dmat.txt', help='Specify file with density matrix for your atom.')
 
 # myAtom.displayData();
 # myAtom.displayDensityMatrix();
@@ -170,8 +170,10 @@ for i in range(0, noShl):
     main += '  %s.setShell(%d, %s, %s, %s, %s);\n' % (gridName ,i, myAtom.ang[i], myAtom.x[i], myAtom.y[i], myAtom.z[i])
 
 # set points to equidistant range
-main += '\n  %s.setCoord(%d, %d);\n' % (gridName, ptStart, ptEnd)
+#main += '\n  %s.setCoord(%d, %d);\n' % (gridName, ptStart, ptEnd)
 
+# set points from file
+main += '\n  %s.setCoordFile((char*)"./input/grid.txt");' % (gridName)
 # calculate grid and write output to file "output.txt"
 main += '''
   %s.calcGrid();
