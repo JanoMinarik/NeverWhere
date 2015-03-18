@@ -8,6 +8,7 @@ class grid{
     int noPoints;
     int noAOs;
     double atomDensity;
+    double clcTm;
     atom gridAtom;
     /// functions
     void setGrid(int);
@@ -27,13 +28,14 @@ class grid{
     void setExp(double[]);
     void setCoef(double[]);
     // grid calculation
-    void calcGrid();
+    void calcGrid(int, int);
     void printGrid();
     void printFullGrid();
     void printDensityMatrix();
     void printGridInfo();
     void printGridAtom();
-    // grid variables
+    void printCorner(double*, int, int); 
+   // grid variables
     double *xCoord;
     double *yCoord;
     double *zCoord;
@@ -48,9 +50,11 @@ class grid{
     int getNoFnc();
     void calcDensity();
     void calcDensityScr();
-    void densityScreening(double*[], double*[], int);
-    void cleanArr(double*[], int, int);
-    double tempArrMull(double *[], double *[], int);
+    void calcDensityBatch(int);
+    void densityScreening(double*, double*, int);
+    void cleanArr(double*, int, int);
+    double tempArrMull(double*, double*, int);
+    void vectorwiseProduct(double*, double*, int, int);
 };
 
 #endif

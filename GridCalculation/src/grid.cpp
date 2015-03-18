@@ -5,8 +5,10 @@
 #include <time.h>
 #include <math.h>
 #include <fstream>
+#include "mkl.h"
 
 #define PI 3.1415926
+#define min(x,y) ((x < y) ? x : y)
 
 /// grid memory alocation/ free.
 void grid::setGrid(int nPn)
@@ -192,9 +194,10 @@ void grid::printDensityMatrix(){
 }
 
 void grid::printGridInfo(){
+  std::cout << "== SUCCESS ==\n";
+  printf("calculation time: %.5lf ms\n", clcTm*1000);
   std::cout << "no Points: " << noPoints << "\n";
   std::cout << "no AOs: " << noAOs << "\n";
-  //std::cout << "density: " << atomDensity << "\n";
   printf("no electrons: %lf\n", atomDensity);
 }
 
@@ -225,11 +228,19 @@ void grid::printGridAtom(){
   }
   std::cout << "====================\n";
 }
+
+void grid::printCorner(double *A, int m, int n){
+  for(int i=0; i<m; i++){
+    for(int j=0; j<n; j++)std::cout << A[i*n+j]  << " ";
+    std::cout << "\n";
+  }
+}
 /// calculate grid density
-void grid::calcGrid()
+void grid::calcGrid(int opt, int pts)
 {
     int curValue, curFnc;
-    double value, R;
+    int LOOP_CNT = 1;
+    double value, R, s_init;
     for( int curPt = 0; curPt < noPoints; curPt++ )
     {
         curValue = curFnc = 0;
@@ -265,8 +276,22 @@ void grid::calcGrid()
             }
         }
     }
-    //calcDensity();
-    calcDensityScr();
+   
+    s_init = dsecnd(); 
+    switch(opt){
+      case 1:
+        calcDensity();
+        break;
+      case 2:
+        calcDensityScr();
+        break;
+      case 3:
+        calcDensityBatch(pts);
+        break;
+      default:
+        std::cout << "\n\n == ERROR: Invalid option parameter. ==\n\n ";
+    }
+    clcTm = (dsecnd() - s_init)/LOOP_CNT;
 }
 
 void grid::calcDensity(){
@@ -284,20 +309,65 @@ void grid::calcDensity(){
   }
 }
 
+void grid::calcDensityBatch(int pts){
+  int start, end, step;
+  start = 0; end = min(pts-1, noPoints);
+  double *chi, *X, *DM;
+  
+  DM = (double*)mkl_malloc( noAOs*noAOs*sizeof(double), 64 ); 
+  chi = (double*)mkl_malloc( pts*noAOs*sizeof(double), 64 );
+  X = (double*)mkl_malloc( pts*noAOs*sizeof(double), 64 );
+  DM = &densityMatrix[0][0]; 
+
+
+  if( chi == NULL || X == NULL || DM == NULL ){
+    std::cout << " == ERROR: Memory allocation failed. ==\n\n";
+    mkl_free(chi);
+    mkl_free(DM);
+    mkl_free(X);
+    return;
+  }
+
+  atomDensity = 0.0;
+  for(; end<noPoints;){
+    for(int i=0; i<pts; i++){
+      for(int j=0; j<noAOs; j++){
+        if((start+i) >= noPoints)
+           chi[i*noAOs + j] = 0.0;
+        else
+           chi[i*noAOs + j] = gridValue[start+i][j];
+      }
+    }    
+
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, pts, noAOs, noAOs, 1, chi, noAOs, DM, noAOs, 0, X, noAOs);
+    vectorwiseProduct(X, chi, start, end);
+
+    //printCorner(chi, 3, 3);
+    //printCorner(X, 3, 3);
+    //break;
+
+    start = end;
+    end = min(end+pts, noPoints);
+  }
+}
+
 void grid::calcDensityScr(){
   atomDensity = 0.0;
-  double *lArr[noAOs], *rArr[noAOs];
+  double *lArr, *rArr;
   double hlp[noAOs];
 
+  rArr = (double*)mkl_malloc( noAOs*sizeof(double), 64 );
+  lArr = (double*)mkl_malloc( noAOs*sizeof(double), 64 );
+ 
   for(int p=0; p<noPoints; p++){
-    for(int i=0; i<noAOs; i++){lArr[i] = &gridValue[p][i];}
+    for(int i=0; i<noAOs; i++){lArr[i] = gridValue[p][i];}
     //temporary while cblas.h is not working
     for(int i=0; i<noAOs; i++){
       hlp[i] = 0.0;
       for(int j=0; j<noAOs; j++){
         hlp[i] += densityMatrix[i][j]*gridValue[p][j]; 
       }
-      rArr[i] = &hlp[i];
+      rArr[i] = hlp[i];
     }
     densityScreening(lArr, rArr, p);
     atomDensity += gridDensity[p];    
@@ -339,34 +409,26 @@ int grid::getNoFnc(){
     return 15;
   return noFnc;
 }
-// calculate density with screening
-void grid::densityScreening(double *arr1[], double *arr2[], int p){
+
+void grid::densityScreening(double *arr1, double *arr2, int p){
   int lng = noAOs;
-  double precision = 1e-10;
+  double precision = 1e-12;
   for(int i=0; i<lng; i++){
-    if(*arr1[i] < precision && *arr1[i] > -precision){
+    if(arr1[i] < precision && arr1[i] > -precision){
       cleanArr(arr1, i, lng);
       cleanArr(arr2, i, lng);
       i--;
       lng--;  
     }
   }
-  if(p < 10){
-    for(int i=0; i<lng; i++){
-      std::cout << *arr1[i]  << " ";
-    }
-  std::cout << "\n";
-    for(int i=0; i<lng; i++){
-      std::cout << *arr2[i] << " ";
-    }
-  std::cout << "\n";
-  } 
   // temporary while cblas.h is not working
-  gridDensity[p] = tempArrMull(arr1, arr2, lng);
+  gridDensity[p] = cblas_ddot(lng, arr1, 1, arr2, 1);
+  //gridDensity[p] = tempArrMull(arr1, arr2, lng);
+  gridDensity[p] *= weight[p];
 }
 
-void grid::cleanArr(double *arr[], int idx, int lng){
-  double *hlp;
+void grid::cleanArr(double *arr, int idx, int lng){
+  double hlp;
   if(lng<0){return;};
   for(int i=idx; i<lng; i++){
     hlp = arr[i+1];
@@ -376,12 +438,23 @@ void grid::cleanArr(double *arr[], int idx, int lng){
   arr[lng] = NULL;
 }
 
-double grid::tempArrMull(double *arr1[], double *arr2[], int lng){
+double grid::tempArrMull(double *arr1, double *arr2, int lng){
  double out = 0.0;
  if(lng < 1){return 0.0;}; 
 
  for(int i=0; i<lng; i++){ 
-   out+=(*arr1[i])*(*arr2[i]);
+   out+=arr1[i]*arr2[i];
  }
  return out;
+}
+
+void grid::vectorwiseProduct(double *A, double *B, int start, int end){
+  for(int i=0; i<(end-start); i++){
+    gridDensity[start + i] = 0.0;
+    for(int j=0; j<noAOs; j++){
+      gridDensity[start + i] +=  A[i*noAOs + j]*B[i*noAOs + j];
+      gridDensity[start + i] *= weight[start + i];
+      atomDensity += gridDensity[start + i];
+    }
+  }
 }

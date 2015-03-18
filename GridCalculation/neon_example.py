@@ -10,8 +10,6 @@ insert destination of your compiler below:
 '''
 #!/usr/bin/python
 
-#import argparse
-
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
         self.noShells=noShells
@@ -100,87 +98,89 @@ def cntLines(name):
     with open(name) as f:
        return sum(1 for _ in f)
 
-
-# Experiment Data hardcoed           
+# Experiment Parameters           
 myAtom = atom(6, 25)
 myAtom.readData("./input/neon.txt")
 myAtom.readDensityMatrix("./input/dmat.txt")
+gridFile = './input/grid.txt'
 gridName = 'myGrid'
-gridPts = 16496
+gridPts = cntLines(gridFile); 
 ptStart = 0
 ptEnd = 10
-noShl = len(myAtom.ang)
 noFnc = len(myAtom.coef)
-
-# Experiment Data from Parser
-#parser = argparse.ArgumentParser(description='Generates main.cpp for example scenario.')
-#parser.add_argument('-i', '--input', dest='ifile', default='./input/neon.txt', help='Specify input file with your atom coordinates and contration functions.')
-#parser.add_argument('-o', '--output', dest='ofile', default='output.txt', help='Specify output file.')
-#parser.add_argument('-g', '--grid', dest='gfile', default='None', help='Specify input file with coordinates of gridpoint and its weight.')
-#parser.add_argument('-d', '--density', dest='dfile', default='./input/dmat.txt', help='Specify file with density matrix for your atom.')
+noShl = len(myAtom.ang)
+precision = 1e-12
 
 # myAtom.displayData();
 # myAtom.displayDensityMatrix();
+
+def main():
 # include libraries
-main = '''#include "atom.h"
+  build = '''#include "atom.h"
 #include "grid.h"
-\nint main(){
-'''
+  \nstatic double precision = %s
+  \nint main(){
+  ''' % (precision)
 
 # initialize grid
-main += '  grid %s;\n' % gridName
+  build += '  grid %s;\n' % gridName
 
 # set atom
-main += '  int shellNos [] = {'
-for i in range(0, len(myAtom.shellNo)):
-    main += '%s, ' % (myAtom.shellNo[i])
-main += '};\n'
-main += '  int shellFncs [] = {'
-for i in range(0, len(myAtom.shellFnc)):
-    main += '%s, ' % (myAtom.shellFnc[i])
-main += '};\n'
-main += '  double shellCoefs [] = {'
-for i in range(0, len(myAtom.coef)):
-    main += '%s, ' % (myAtom.coef[i])
-main += '};\n'
-main += '  double shellExps [] = {'
-for i in range(0, len(myAtom.exp)):
-    main += '%s, ' % (myAtom.exp[i])
-main += '};\n\n'
+  build += '  int shellNos [] = {'
+  for i in range(0, len(myAtom.shellNo)):
+      build += '%s, ' % (myAtom.shellNo[i])
+  build += '};\n'
+  build += '  int shellFncs [] = {'
+  for i in range(0, len(myAtom.shellFnc)):
+      build += '%s, ' % (myAtom.shellFnc[i])
+  build += '};\n'
+  build += '  double shellCoefs [] = {'
+  for i in range(0, len(myAtom.coef)):
+      build += '%s, ' % (myAtom.coef[i])
+  build += '};\n'
+  build += '  double shellExps [] = {'
+  for i in range(0, len(myAtom.exp)):
+      build += '%s, ' % (myAtom.exp[i])
+  build += '};\n\n'
 
-main += '  double dMat[%d][%d] = {\n' %( myAtom.noFnc, myAtom.noFnc)
-for i in range(myAtom.noFnc):
-    main += '{'
-    for j in range(myAtom.noFnc):
-        main += '%f, ' % (myAtom.densMat[i][j])
-    main += '},\n' 
-main += '  };\n\n'
-main += '  double *pDMat = &dMat[0][0];\n'
+  build += '  double dMat[%d][%d] = {\n' %( myAtom.noFnc, myAtom.noFnc)
+  for i in range(myAtom.noFnc):
+      build += '{'
+      for j in range(myAtom.noFnc):
+          build += '%f, ' % (myAtom.densMat[i][j])
+      build += '},\n' 
+  build += '  };\n\n'
+  build += '  double *pDMat = &dMat[0][0];\n'
 
-main += '  %s.initAtom(%s, %s);\n' % (gridName, noShl, noFnc)
-main += '  %s.setGrid(%d);\n' %(gridName, gridPts)
-main += '  %s.setShellNumber(shellNos);\n' % (gridName)
-main += '  %s.setShellFunction(shellFncs);\n' % (gridName)
-main += '  %s.setExp(shellExps);\n' % (gridName)
-main += '  %s.setCoef(shellCoefs);\n' % (gridName)
-main += '  %s.setDensityMatrix(pDMat);\n' %(gridName)
+  build += '  %s.initAtom(%s, %s);\n' % (gridName, noShl, noFnc)
+  build += '  %s.setGrid(%d);\n' %(gridName, gridPts)
+  build += '  %s.setShellNumber(shellNos);\n' % (gridName)
+  build += '  %s.setShellFunction(shellFncs);\n' % (gridName)
+  build += '  %s.setExp(shellExps);\n' % (gridName)
+  build += '  %s.setCoef(shellCoefs);\n' % (gridName)
+  build += '  %s.setDensityMatrix(pDMat);\n' %(gridName)
 
 # set atom shells
-for i in range(0, noShl):
-    main += '  %s.setShell(%d, %s, %s, %s, %s);\n' % (gridName ,i, myAtom.ang[i], myAtom.x[i], myAtom.y[i], myAtom.z[i])
+  for i in range(0, noShl):
+      build += '  %s.setShell(%d, %s, %s, %s, %s);\n' % (gridName ,i, myAtom.ang[i], myAtom.x[i], myAtom.y[i], myAtom.z[i])
 
-# set points to equidistant range
-#main += '\n  %s.setCoord(%d, %d);\n' % (gridName, ptStart, ptEnd)
 
 # set points from file
-main += '\n  %s.setCoordFile((char*)"./input/grid.txt");' % (gridName)
+  build += '\n  %s.setCoordFile((char*)"%s");' % (gridName, gridFile)
+
+# set points to equidistant range
+  #build += '\n  %s.setCoord(%d, %d);\n' % (gridName, ptStart, ptEnd)
+
 # calculate grid and write output to file "output.txt"
-main += '''
+  build += '''
   %s.calcGrid();
   %s.printGridInfo();
   %s.printGrid();
-''' %(gridName, gridName, gridName)
-main += '  return 0;\n}'
+  ''' %(gridName, gridName, gridName)
+  build += '  return 0;\n}'
 
-# print main to main.cpp
-print(main);
+# print build to build.cpp
+  print(build)
+
+if __name__ == '__main__':
+  main()

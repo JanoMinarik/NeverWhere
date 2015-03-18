@@ -1,7 +1,9 @@
 # set compiler
-CC = g++
+#CC = g++
+CC = icc
 
 # compiler flags
+PFLAGS = -mkl
 CFLAGS = -I./src/
 
 # target
@@ -11,4 +13,4 @@ TARGET = main.x
 FILES = ./src/*.cpp main.cpp
 
 grid: ./src/grid.cpp ./src/atom.cpp main.cpp
-	$(CC) -o $(TARGET) $(FILES) $(CFLAGS)
+	$(CC) $(PFLAGS) -o $(TARGET) $(FILES) $(CFLAGS)
