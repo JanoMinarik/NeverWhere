@@ -53,6 +53,7 @@ class grid{
     void calcDensityBatch(int);
     void densityScreening(double*, double*, int);
     void cleanArr(double*, int, int);
+    double* tempMatMull(double*, double*, int, int, int);
     double tempArrMull(double*, double*, int);
     void vectorwiseProduct(double*, double*, int, int);
 };

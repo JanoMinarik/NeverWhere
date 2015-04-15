@@ -311,7 +311,7 @@ void grid::calcDensity(){
 
 void grid::calcDensityBatch(int pts){
   int start, end, step;
-  start = 0; end = min(pts-1, noPoints);
+  start = 0; end = min(pts, noPoints);
   double *chi, *X, *DM;
   
   DM = (double*)mkl_malloc( noAOs*noAOs*sizeof(double), 64 ); 
@@ -330,25 +330,28 @@ void grid::calcDensityBatch(int pts){
 
   atomDensity = 0.0;
   for(; end<noPoints;){
-    for(int i=0; i<pts; i++){
+    step = end - start;
+    for(int i=0; i<step; i++){
       for(int j=0; j<noAOs; j++){
-        if((start+i) >= noPoints)
-           chi[i*noAOs + j] = 0.0;
-        else
-           chi[i*noAOs + j] = gridValue[start+i][j];
+        chi[i*noAOs + j] = gridValue[start+i][j];
       }
     }    
 
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, pts, noAOs, noAOs, 1, chi, noAOs, DM, noAOs, 0, X, noAOs);
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, step, noAOs, noAOs, 1, chi, noAOs, DM, noAOs, 0, X, noAOs);
     vectorwiseProduct(X, chi, start, end);
-
-    //printCorner(chi, 3, 3);
-    //printCorner(X, 3, 3);
+    
+    //printCorner(C, 3, 15);
+    //std::cout << "X: \n";
+    //printCorner(X, 3, 15);
     //break;
-
+    
     start = end;
     end = min(end+pts, noPoints);
   }
+
+  mkl_free(chi);
+  mkl_free(DM);
+  mkl_free(X);
 }
 
 void grid::calcDensityScr(){
@@ -421,9 +424,8 @@ void grid::densityScreening(double *arr1, double *arr2, int p){
       lng--;  
     }
   }
-  // temporary while cblas.h is not working
+  
   gridDensity[p] = cblas_ddot(lng, arr1, 1, arr2, 1);
-  //gridDensity[p] = tempArrMull(arr1, arr2, lng);
   gridDensity[p] *= weight[p];
 }
 
@@ -448,13 +450,28 @@ double grid::tempArrMull(double *arr1, double *arr2, int lng){
  return out;
 }
 
+double* grid::tempMatMull(double *mat1, double *mat2, int m, int n, int k){
+  double *C;
+  C = (double*)malloc(m*n*sizeof(double));
+  
+  for(int i=0; i<m; i++){
+    for(int j=0; j<n; j++){
+      C[i*n+j] = 0.0;
+      for(int l=0; l<k; l++){
+        C[i*n+j] += mat1[i*k+l]*mat2[l*n+j];
+      }
+    }
+  }
+  return C;
+}
+
 void grid::vectorwiseProduct(double *A, double *B, int start, int end){
   for(int i=0; i<(end-start); i++){
     gridDensity[start + i] = 0.0;
     for(int j=0; j<noAOs; j++){
       gridDensity[start + i] +=  A[i*noAOs + j]*B[i*noAOs + j];
-      gridDensity[start + i] *= weight[start + i];
-      atomDensity += gridDensity[start + i];
     }
+    gridDensity[start + i] *= weight[start + i];
+    atomDensity += gridDensity[start + i];
   }
 }

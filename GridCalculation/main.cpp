@@ -1,5 +1,6 @@
 #include "atom.h"
 #include "grid.h"
+//#include "ccalc.cuh"
 //extern static double precision = 1e-12
   
 int main(){
@@ -43,7 +44,7 @@ int main(){
   myGrid.setShell(5, 2, 0.0, 0.0, 0.0);
 
   myGrid.setCoordFile((char*)"./input/grid.txt");
-  myGrid.calcGrid(2, 100);
+  myGrid.calcGrid(3, 100);
  
   myGrid.printGridInfo();
   myGrid.printGrid();
