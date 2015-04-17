@@ -100,7 +100,7 @@ def cntLines(name):
 
 # Experiment Parameters           
 myAtom = atom(6, 25)
-myAtom.readData("./input/neon-dz/neon.txt")
+myAtom.readData("./input/neon-dz/basis.txt")
 myAtom.readDensityMatrix("./input/neon-dz/dmat.txt")
 gridFile = './input/neon-dz/grid.txt'
 gridName = 'myGrid'
