@@ -43,7 +43,7 @@ int main(){
   myGrid.setShell(4, 1, 0.0, 0.0, 0.0);
   myGrid.setShell(5, 2, 0.0, 0.0, 0.0);
 
-  myGrid.setCoordFile((char*)"./input/grid.txt");
+  myGrid.setCoordFile((char*)"./input/neon-dz/grid.txt");
   myGrid.calcGrid(3, 100);
  
   myGrid.printGridInfo();
