@@ -1,6 +1,6 @@
 #include "atom.h"
 #include "grid.h"
-//#include "ccalc.cuh"
+#include "ccalc.h"
 //extern static double precision = 1e-12
   
 int main(){
@@ -45,6 +45,8 @@ int main(){
 
   myGrid.setCoordFile((char*)"./input/neon-dz/grid.txt");
   myGrid.calcGrid(3, 100);
+
+  calcDensCuda(1, 100, myGrid); 
  
   myGrid.printGridInfo();
   myGrid.printGrid();

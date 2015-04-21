@@ -1,5 +1,5 @@
 #include <iostream>
-//#include "ccalc.cuh"
+#include "ccalc.h"
 #include "grid.h"
 
 // data manipulation
@@ -28,8 +28,14 @@ void cpyResult(double *gridDensity, double *cd_gDns, int pts){
 
 }
 
-// calculation
+void freeMem(double *cd_DM, double *cd_gVal, double *cd_wght, double *cd_gDns){
+  cudaFree( cd_DM );
+  cudaFree( cd_gVal );
+  cudaFree( cd_wght );
+  cudaFree( cd_gDns );
+}
 
+// calculation
 __global__ void calcDens(int start, int pts, int noAOs, double *cd_DM, double *cd_gVal, double *cd_wght, double *cd_gDns){
   int tid = blockIdx.x;
   int k, l;
@@ -46,10 +52,12 @@ __global__ void calcDens(int start, int pts, int noAOs, double *cd_DM, double *c
   }
 }
 
+__global__ void calcDensFast(int start, int pts, int noAOs, double *cd_DM, double *cd_gVal, double *cd_wght, double *cd_gDns){
 
+}
 
 // interfaces
-void calcDensCuda(int cores, grid myGrid){
+void calcDensCuda(int opt, int cores, grid myGrid){
   double *cd_DM, *cd_gVal, *cd_wght, *cd_gDns; 
   cd_DM = cd_gVal = cd_wght = cd_gDns = NULL;  
 

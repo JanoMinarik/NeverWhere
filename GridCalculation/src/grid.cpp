@@ -340,9 +340,9 @@ void grid::calcDensityBatch(int pts){
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, step, noAOs, noAOs, 1, chi, noAOs, DM, noAOs, 0, X, noAOs);
     vectorwiseProduct(X, chi, start, end);
     
-    //printCorner(C, 3, 15);
+    //printCorner(C, 1, 15);
     //std::cout << "X: \n";
-    //printCorner(X, 3, 15);
+    //printCorner(X, 1, 15);
     //break;
     
     start = end;
