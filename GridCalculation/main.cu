@@ -1,6 +1,11 @@
 #include "atom.h"
 #include "grid.h"
-#include "ccalc.h"
+#define CUDA_ENABLED 1
+#define MPI_ENABLED 0
+
+#if CUDA_ENABLED
+  #include "ccalc.h"
+#endif
 //extern static double precision = 1e-12
   
 int main(){
@@ -44,9 +49,11 @@ int main(){
   myGrid.setShell(5, 2, 0.0, 0.0, 0.0);
 
   myGrid.setCoordFile((char*)"./input/neon-dz/grid.txt");
-  myGrid.calcGrid(3, 100);
 
-  calcDensCuda(1, 100, myGrid); 
+  myGrid.calcGrid(3, 100);
+  #if CUDA_ENABLED
+    calcDensCuda(1, 100, myGrid); 
+  #endif 
  
   myGrid.printGridInfo();
   myGrid.printGrid();

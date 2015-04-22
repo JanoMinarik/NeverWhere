@@ -2,11 +2,7 @@
 #define __ccalc_H_INCLUDED__
 #include "grid.h"
 
-void cpyInitial(double*, double*, double*, double*,
-                           double*, double*, double*,
-                           int, int);
 void freeMem(double*, double*, double*, double*);
-void cpyResult(double*, double*, int);
 
 void calcDensCuda(int, int, grid);
 

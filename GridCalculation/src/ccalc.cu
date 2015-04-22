@@ -2,32 +2,6 @@
 #include "ccalc.h"
 #include "grid.h"
 
-// data manipulation
-void cpyInitial(double *DM, double *cd_DM, double *gridValue, double *cd_gVal,
-                           double *weight, double *cd_wght, double *cd_gDns,
-                           int pts, int noAOs ){
-
-  cudaMalloc( (void**)cd_DM, noAOs*noAOs*sizeof(double) );
-  cudaMalloc( (void**)cd_gVal, pts*noAOs*sizeof(double) );
-  cudaMalloc( (void**)cd_gDns, pts*sizeof(double) );
-  cudaMalloc( (void**)cd_wght, pts*sizeof(double) );
-
-  if( cd_DM == NULL || cd_gVal == NULL || cd_gDns == NULL || cd_wght == NULL ){
-    std::cout << " == ERROR CUDA memory allocation failed. ==\n";
-    return;
-  }
-
-  cudaMemcpy( cd_DM, DM, pts*sizeof(double), cudaMemcpyHostToDevice );
-  cudaMemcpy( cd_gVal, gridValue, pts*noAOs*sizeof(double), cudaMemcpyHostToDevice );
-  cudaMemcpy( cd_wght, weight, pts*sizeof(double), cudaMemcpyHostToDevice );
-}
-
-void cpyResult(double *gridDensity, double *cd_gDns, int pts){
-  cudaMemcpy( gridDensity, cd_gDns, pts*sizeof(double), cudaMemcpyDeviceToHost );
-
-
-}
-
 void freeMem(double *cd_DM, double *cd_gVal, double *cd_wght, double *cd_gDns){
   cudaFree( cd_DM );
   cudaFree( cd_gVal );
@@ -59,19 +33,36 @@ __global__ void calcDensFast(int start, int pts, int noAOs, double *cd_DM, doubl
 // interfaces
 void calcDensCuda(int opt, int cores, grid myGrid){
   double *cd_DM, *cd_gVal, *cd_wght, *cd_gDns; 
-  cd_DM = cd_gVal = cd_wght = cd_gDns = NULL;  
+  
+  cudaMalloc( (void**)cd_DM, myGrid.noAOs*myGrid.noAOs*sizeof(double) );
+  cudaMalloc( (void**)cd_gVal, myGrid.noPoints*myGrid.noAOs*sizeof(double) );
+  cudaMalloc( (void**)cd_gDns, myGrid.noPoints*sizeof(double) );
+  cudaMalloc( (void**)cd_wght, myGrid.noPoints*sizeof(double) );
 
-  cpyInitial(&myGrid.densityMatrix[0][0], cd_DM, &myGrid.gridValue[0][0], cd_gVal, myGrid.weight, cd_wght, 
-             cd_gDns, myGrid.noPoints, myGrid.noAOs);
+  if( cd_DM == NULL || cd_gVal == NULL || cd_gDns == NULL || cd_wght == NULL ){
+    std::cout << " == ERROR CUDA memory allocation failed. ==\n";
+    return;
+  }
  
+  std::cout << "Size of cd_DM: " << sizeof(cd_DM)  << "\n";
+  std::cout << "Size of cd_gVal: " << sizeof(cd_gVal)  << "\n";
+  std::cout << "Size of cd_gDns: " << sizeof(cd_gDns)  << "\n";
+  std::cout << "Size of cd_wght: " << sizeof(cd_wght)  << "\n";
+ 
+  cudaMemcpy( cd_DM, myGrid.densityMatrix, myGrid.noAOs*myGrid.noAOs*sizeof(double), cudaMemcpyHostToDevice );
+  cudaMemcpy( cd_gVal, myGrid.gridValue, myGrid.noPoints*myGrid.noAOs*sizeof(double), cudaMemcpyHostToDevice );
+  cudaMemcpy( cd_wght, myGrid.weight, myGrid.noPoints*sizeof(double), cudaMemcpyHostToDevice );
+
   for(int i=0; i<myGrid.noPoints; i+=cores){
     calcDens<<<cores,1>>>(i, cores, myGrid.noAOs, cd_DM, cd_gVal, cd_wght, cd_gDns);
   } 
 
-  cpyResult(myGrid.gridDensity, cd_gDns, myGrid.noPoints);
+  cudaMemcpy( myGrid.gridDensity, cd_gDns, myGrid.noPoints*sizeof(double), cudaMemcpyDeviceToHost );
   myGrid.atomDensity = 0.0;
   for(int i=0; i<myGrid.noPoints; i++){
     myGrid.atomDensity += myGrid.gridDensity[i]; 
   }
+
+  freeMem(cd_DM, cd_gVal, cd_wght, cd_gDns);
 }
 
