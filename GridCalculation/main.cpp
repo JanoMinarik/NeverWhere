@@ -1,7 +1,7 @@
 #include "atom.h"
 #include "grid.h"
-#define CUDA_ENABLED 1
-#define MPI_ENABLED 0
+#define CUDA_ENABLED 0
+#define MPI_ENABLED 1
 
 #if CUDA_ENABLED
   #include "ccalc.h"
@@ -52,7 +52,7 @@ int main(){
 
   myGrid.calcGrid(3, 100);
   #if CUDA_ENABLED
-    calcDensCuda(1, 100, myGrid); 
+    calcDensCuda(100, myGrid); 
   #endif 
  
   myGrid.printGridInfo();
