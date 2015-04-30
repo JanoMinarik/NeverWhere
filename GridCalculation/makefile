@@ -1,6 +1,6 @@
 # set compiler
-#CC = g++
-CC = icc
+#CXX = g++
+CXX = icpc
 
 # compiler flags
 PFLAGS = -mkl
@@ -15,4 +15,4 @@ FILES = ./src/*.cpp main.cpp
 # run compilation
 grid: ./src/grid.cpp ./src/atom.cpp main.cpp
 
-	$(CC) $(PFLAGS) -o $(TARGET) $(FILES) $(CFLAGS)
+	$(CXX) $(PFLAGS) -o $(TARGET) $(FILES) $(CFLAGS)
