@@ -9,6 +9,7 @@ in cube of 8x8x8 atomic units.
 insert destination of your compiler below:
 '''
 #!/usr/bin/python
+import re
 
 class atom:
     def __init__(self, noShells=0, noFunctions=0):
@@ -30,6 +31,7 @@ class atom:
             line = f.readline()
             line = line.lstrip()
             line = line.replace('\n','')
+            line = re.sub(' +',' ', line)
             if(len(line) < 1):
                 continue
             if(not self.representsInt(line[0])):
@@ -65,6 +67,8 @@ class atom:
         self.densMat = [[0 for x in range(self.noFnc)] for x in range(self.noFnc) ]
         with open(fileName) as openfileobject:
           for line in openfileobject:
+            line = line.lstrip()
+            line = re.sub(' +',' ', line)
             if(len(line)<1):
                continue;
             if(line[0] == '#'):
@@ -117,8 +121,10 @@ precision = 1e-12
 def main():
 # include libraries
   build = '''#include "atom.h"
-#include "grid.h"
-  \nstatic double precision = %s
+  #include "grid.h"
+  #define CUDA_ENABLED 0
+  #define MPI_ENABLED 1
+  \nstatic double precision = %s;
   \nint main(){
   ''' % (precision)
 
@@ -173,11 +179,11 @@ def main():
 
 # calculate grid and write output to file "output.txt"
   build += '''
-  %s.calcGrid();
+  %s.calcGrid(1, 100);
   %s.printGridInfo();
   %s.printGrid();
   ''' %(gridName, gridName, gridName)
-  build += '  return 0;\n}'
+  build += 'return 0;\n}'
 
 # print build to build.cpp
   print(build)

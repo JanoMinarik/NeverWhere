@@ -1,7 +1,7 @@
 #include "atom.h"
 #include "grid.h"
 #define CUDA_ENABLED 0
-#define MPI_ENABLED 1
+#define MKL_ENABLED 1
 
 #if CUDA_ENABLED
   #include "ccalc.h"
@@ -50,10 +50,10 @@ int main(){
 
   myGrid.setCoordFile((char*)"./input/neon-dz/grid.txt");
 
-  myGrid.calcGrid(3, 100);
-  #if CUDA_ENABLED
+  myGrid.calcGrid(2, 100);
+#if CUDA_ENABLED
     calcDensCuda(100, myGrid); 
-  #endif 
+#endif 
  
   myGrid.printGridInfo();
   myGrid.printGrid();

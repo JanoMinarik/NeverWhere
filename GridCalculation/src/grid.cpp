@@ -5,13 +5,12 @@
 #include <time.h>
 #include <math.h>
 #include <fstream>
-#define MPI_ENABLED 0
-#if MPI_ENABLED
+#define MKL_ENABLED 1
+#if MKL_ENABLED
   #include "mkl.h"
 #endif
 
 #define PI 3.1415926
-const double precision = 1e-12;
 #define min(x,y) ((x < y) ? x : y)
 
 /// grid memory alocation/ free.
@@ -198,9 +197,9 @@ void grid::printDensityMatrix(){
 }
 
 void grid::printGridInfo(){
-  #if MPI_ENABLED
+#if MKL_ENABLED
     std::cout << "Using Intel(R) blas API.\n";
-  #endif
+#endif
   std::cout << "== SUCCESS ==\n";
   printf("calculation time: %.5lf ms\n", clcTm*1000);
   std::cout << "no Points: " << noPoints << "\n";
@@ -283,9 +282,9 @@ void grid::calcGrid(int opt, int pts)
             }
         }
     }
-    #if MPI_ENABLED 
+#if MKL_ENABLED 
       s_init = dsecnd();
-    #endif 
+#endif 
     switch(opt){
       case 1:
         calcDensity();
@@ -299,9 +298,9 @@ void grid::calcGrid(int opt, int pts)
       default:
         std::cout << "\n\n == ERROR: Invalid option parameter. ==\n\n ";
     }
-    #if MPI_ENABLED
+#if MKL_ENABLED
       clcTm = (dsecnd() - s_init)/LOOP_CNT;
-    #endif
+#endif
 }
 
 void grid::calcDensity(){
@@ -324,30 +323,30 @@ void grid::calcDensityBatch(int pts){
   start = 0; end = min(pts, noPoints);
   double *chi, *X, *DM;
  
-  #if MPI_ENABLED 
+#if MKL_ENABLED 
     DM = (double*)mkl_malloc( noAOs*noAOs*sizeof(double), 64 ); 
     chi = (double*)mkl_malloc( pts*noAOs*sizeof(double), 64 );
     X = (double*)mkl_malloc( pts*noAOs*sizeof(double), 64 );
-  #else
+#else
     DM = (double*)malloc( noAOs*noAOs*sizeof(double) );
     chi = (double*)malloc( pts*noAOs*sizeof(double) );
     X = (double*)malloc( pts*noAOs*sizeof(double) );
-  #endif
+#endif
  
   DM = &densityMatrix[0][0]; 
 
 
   if( chi == NULL || X == NULL || DM == NULL ){
     std::cout << " == ERROR: Memory allocation failed. ==\n\n";
-    #if MPI_ENABLED
+#if MKL_ENABLED
       mkl_free(chi);
       mkl_free(DM);
       mkl_free(X);
-    #else
+#else
       free(chi);
       free(DM);
       free(X);
-    #endif
+#endif
     return;
   }
 
@@ -360,25 +359,25 @@ void grid::calcDensityBatch(int pts){
       }
     }    
 
-    #if MPI_ENABLED
+#if MKL_ENABLED
       cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, step, noAOs, noAOs, 1, chi, noAOs, DM, noAOs, 0, X, noAOs);
-    #else
+#else
       X =  tempMatMull(chi, DM, step, noAOs, noAOs); 
-    #endif
+#endif
     vectorwiseProduct(X, chi, start, end);
     
     start = end;
     end = min(end+pts, noPoints);
   }
-  #if MPI_ENABLED
+#if MKL_ENABLED
     mkl_free(chi);
     mkl_free(DM);
     mkl_free(X);
-  #else
+#else
     free(chi);
     free(DM);
     free(X);
-  #endif
+#endif
 }
 
 void grid::calcDensityScr(){
@@ -386,13 +385,13 @@ void grid::calcDensityScr(){
   double *lArr, *rArr;
   double hlp[noAOs];
 
-  #if MPI_ENABLED
+#if MKL_ENABLED
     rArr = (double*)mkl_malloc( noAOs*sizeof(double), 64 );
     lArr = (double*)mkl_malloc( noAOs*sizeof(double), 64 );
-  #else
+#else
     rArr = (double*)malloc( noAOs*sizeof(double) );
     lArr = (double*)malloc( noAOs*sizeof(double) );
-  #endif 
+#endif 
 
   for(int p=0; p<noPoints; p++){
     for(int i=0; i<noAOs; i++){lArr[i] = gridValue[p][i];}
@@ -408,13 +407,13 @@ void grid::calcDensityScr(){
     atomDensity += gridDensity[p];    
   }
 
-  #if MPI_ENABLED
+#if MKL_ENABLED
     mkl_free(rArr);
     mkl_free(lArr);
-  #else
-    free(rArr);
-    free(lArr);
-  #endif
+#else
+    //free(rArr);
+    //free(lArr);
+#endif
 }
 
 /// protected functions called during calculation
@@ -455,6 +454,7 @@ int grid::getNoFnc(){
 
 void grid::densityScreening(double *arr1, double *arr2, int p){
   int lng = noAOs;
+  double precision = 1e-12;
   for(int i=0; i<lng; i++){
     if(arr1[i] < precision && arr1[i] > -precision){
       cleanArr(arr1, i, lng);
@@ -463,11 +463,11 @@ void grid::densityScreening(double *arr1, double *arr2, int p){
       lng--;  
     }
   }
-  #if MPI_ENABLED 
+#if MKL_ENABLED 
     gridDensity[p] = cblas_ddot(lng, arr1, 1, arr2, 1);
-  #else
+#else
     gridDensity[p] = tempArrMull(arr1, arr2, lng);
-  #endif
+#endif
   gridDensity[p] *= weight[p];
 }
 
@@ -479,7 +479,7 @@ void grid::cleanArr(double *arr, int idx, int lng){
     arr[i+1] = arr[i];
     arr[i] = hlp;
   }
-  arr[lng] = NULL;
+  //arr[lng] = NULL;
 }
 
 double grid::tempArrMull(double *arr1, double *arr2, int lng){
