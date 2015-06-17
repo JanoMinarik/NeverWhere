@@ -4,6 +4,7 @@ CXX = icpc
 
 # compiler flags
 PFLAGS = -mkl
+#PFLAGS = 
 CFLAGS = -I./src/
 
 # target

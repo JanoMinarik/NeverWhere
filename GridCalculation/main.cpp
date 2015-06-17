@@ -1,7 +1,7 @@
 #include "atom.h"
 #include "grid.h"
 #define CUDA_ENABLED 0
-#define MKL_ENABLED 1
+#define MKL_ENABLED 0
 
 #if CUDA_ENABLED
   #include "ccalc.h"
@@ -50,12 +50,25 @@ int main(){
 
   myGrid.setCoordFile((char*)"./input/neon-dz/grid.txt");
 
-  myGrid.calcGrid(2, 100);
+  myGrid.calcGrid(1, 100); // (x, y): x = computation method, y = number of points in a batch
+                           // methods: 1 - sequential, 2 - vector wise (use MKL if able), 3 - batch (use MKL if able)
+                           // 4 - no calculation of density, used for cuda
+  myGrid.printGridInfo();  
+ 
+#if MKL_ENABLED
+    myGrid.calcGrid(2, 100);
+    myGrid.printGridInfo();
+    myGrid.calcGrid(3, 100);
+    myGrid.printGridInfo();
+#endif
+
 #if CUDA_ENABLED
-    calcDensCuda(100, myGrid); 
+    myGrid.calcGrid(4, 100);
+    calcDensCuda(100, &myGrid); // (x, grid): x - no. of GPU cores enabled, grid - name of grid 
+    myGrid.printGridInfo();
 #endif 
  
-  myGrid.printGridInfo();
-  myGrid.printGrid();
+  //myGrid.printGrid();
+  myGrid.printFullGrid();
   return 0;
 }

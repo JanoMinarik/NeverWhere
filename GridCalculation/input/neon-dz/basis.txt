@@ -1,6 +1,6 @@
 # Neon cc-pVDZ basis set input file
 # 6 shells and coresponding 25 contraction functions
-shell ang x y z
+#shell ang x y z
 1 0 0.000 0.000 0.000
 2 0 0.000 0.000 0.000
 3 0 0.000 0.000 0.000
@@ -8,7 +8,7 @@ shell ang x y z
 5 1 0.000 0.000 0.000
 6 2 0.000 0.000 0.000
 
-shell  function   exponent    contraction coefficient
+#shell  function   exponent    contraction coefficient
 1 1 1.78800000e+04 8.13283990e-01
 1 2 2.68300000e+03 1.50832394e+00
 1 3 6.11500000e+02 2.53133644e+00

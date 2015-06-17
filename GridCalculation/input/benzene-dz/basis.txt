@@ -1,4 +1,4 @@
-shell l   x      y      z                                                      
+#shell l   x      y      z                                                      
    1  0  0.000  2.638  0.000                                                    
    2  0  0.000  2.638  0.000                                                    
    3  0  0.000  2.638  0.000                                                    
@@ -54,7 +54,7 @@ shell l   x      y      z
   53  0 -4.057  2.343  0.000                                                    
   54  1 -4.057  2.343  0.000                                                    
 
-shell  function   exponent    contraction coefficient                          
+#shell  function   exponent    contraction coefficient                          
    1       1    6.66500000e+03    3.63803116e-01                                
    1       2    1.00000000e+03    6.75392020e-01                                
    1       3    2.28000000e+02    1.13230098e+00                                

@@ -5,7 +5,7 @@
 #include <time.h>
 #include <math.h>
 #include <fstream>
-#define MKL_ENABLED 1
+#define MKL_ENABLED 0
 #if MKL_ENABLED
   #include "mkl.h"
 #endif
@@ -198,13 +198,13 @@ void grid::printDensityMatrix(){
 
 void grid::printGridInfo(){
 #if MKL_ENABLED
-    std::cout << "Using Intel(R) blas API.\n";
+    std::cout << " Using Intel(R) blas API.\n";
 #endif
-  std::cout << "== SUCCESS ==\n";
-  printf("calculation time: %.5lf ms\n", clcTm*1000);
-  std::cout << "no Points: " << noPoints << "\n";
-  std::cout << "no AOs: " << noAOs << "\n";
-  printf("no electrons: %lf\n", atomDensity);
+  std::cout << " == SUCCESS ==\n";
+  printf(" calculation time: %.5lf ms\n", clcTm);
+  std::cout << " no Points: " << noPoints << "\n";
+  std::cout << " no AOs: " << noAOs << "\n";
+  printf(" no electrons: %lf\n", atomDensity);
 }
 
 void grid::printFullGrid(){
@@ -245,8 +245,13 @@ void grid::printCorner(double *A, int m, int n){
 void grid::calcGrid(int opt, int pts)
 {
     int curValue, curFnc;
-    int LOOP_CNT = 1;
-    double value, R, s_init;
+    static int LOOP_CNT = 1;
+    double value, R;
+#if MKL_ENABLED
+    double s_init;
+#else
+    clock_t s_init, s_end;
+#endif
     for( int curPt = 0; curPt < noPoints; curPt++ )
     {
         curValue = curFnc = 0;
@@ -284,6 +289,8 @@ void grid::calcGrid(int opt, int pts)
     }
 #if MKL_ENABLED 
       s_init = dsecnd();
+#else
+      s_init = clock(); 
 #endif 
     switch(opt){
       case 1:
@@ -296,10 +303,13 @@ void grid::calcGrid(int opt, int pts)
         calcDensityBatch(pts);
         break;
       default:
-        std::cout << "\n\n == ERROR: Invalid option parameter. ==\n\n ";
+        break;
     }
 #if MKL_ENABLED
-      clcTm = (dsecnd() - s_init)/LOOP_CNT;
+      clcTm = (dsecnd() - s_init)/LOOP_CNT*1000;
+#else
+      s_end = clock();
+      clcTm = (double)(s_end-s_init)/CLOCKS_PER_SEC*1000/LOOP_CNT;
 #endif
 }
 
@@ -408,8 +418,8 @@ void grid::calcDensityScr(){
   }
 
 #if MKL_ENABLED
-    mkl_free(rArr);
-    mkl_free(lArr);
+    //mkl_free(rArr);
+    //mkl_free(lArr);
 #else
     //free(rArr);
     //free(lArr);
